@@ -25,7 +25,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
         logger = FakeLogger()
-        mw = self._makeOne(app, logger)
+        mw = self._makeOne(app, 0, logger)
         environ = self._makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
@@ -36,6 +36,18 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(start_response.headers[0], ('HeaderKey','headervalue'))
         self.assertEqual(start_response.exc_info, None)
         self.assertEqual(app.called, True)
+
+    def test_call_overmaxbodylen(self):
+        body = ['thebody']
+        app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
+        logger = FakeLogger()
+        mw = self._makeOne(app, 1, logger)
+        environ = self._makeEnviron()
+        start_response = FakeStartResponse()
+        app_iter = mw(environ, start_response)
+        self.assertEqual(''.join(app_iter), 'thebody')
+        self.assertEqual(len(logger.logged), 2)
+        self.failUnless('(truncated)' in logger.logged[1])
 
 class TestMakeMiddleware(unittest.TestCase):
     def _getFUT(self):
@@ -50,6 +62,7 @@ class TestMakeMiddleware(unittest.TestCase):
         fn = tempfile.mktemp()
         mw = f(app, global_conf, fn)
         self.assertEqual(len(mw.logger.handlers), 1)
+        self.assertEqual(mw.max_bodylen, 0)
 
     def test_make_middleware_nondefaults(self):
         f = self._getFUT()

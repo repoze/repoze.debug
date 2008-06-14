@@ -79,9 +79,22 @@ class ResponseLoggingMiddleware:
             request_id, t, duration))
         out.append('Status: %s' % status)
         out.append('Response Headers')
+        cl = None
         for header in headers:
-            out.append('  %s: %s' % (header[0], header[1]))
-        out.append('Bodylen: %s' % len(body))
+            k, v = header
+            if k.lower() == 'content-length':
+                try:
+                    cl = int(v)
+                except (TypeError, ValueError):
+                    cl = None
+            out.append('  %s: %s' % (k, v))
+        bodylen = len(body)
+        out.append('Bodylen: %s' % bodylen)
+        if cl is not None:
+            if bodylen != cl:
+                out.append(
+                    'WARNING-1: bodylen (%s) != Content-Length '
+                    'header value (%s)' % (bodylen, cl))
         out.append('Body:')
         out.append('')
         bodyout = body

@@ -66,8 +66,6 @@ class ResponseLoggingMiddleware:
         self.logger.info('\n'.join(out))
 
     def log_response(self, environ, status, headers, body):
-        supplement = Supplement(self, environ)
-        request_data = supplement.extraData()
         request_id = environ.get('repoze.debug.id')
         out = [] 
         t = time.ctime()

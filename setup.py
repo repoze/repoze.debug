@@ -30,7 +30,7 @@ setup(name='repoze.debug',
       description='Forensic debugging WSGI middleware',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
         "Topic :: Internet :: WWW/HTTP",

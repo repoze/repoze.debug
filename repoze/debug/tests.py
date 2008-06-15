@@ -61,6 +61,18 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(len(logger.logged), 2)
         self.failUnless('WARNING-1' in logger.logged[1])
 
+    def test_call_sourceurl_in_response(self):
+        body = ['thebody']
+        app = DummyApp(body, '200 OK', [('Content-Length', '1')])
+        logger = FakeLogger()
+        mw = self._makeOne(app, 1, logger)
+        environ = self._makeEnviron()
+        start_response = FakeStartResponse()
+        app_iter = mw(environ, start_response)
+        self.assertEqual(''.join(app_iter), 'thebody')
+        self.assertEqual(len(logger.logged), 2)
+        self.failUnless('URL: http://localhost' in logger.logged[1])
+
 class TestMakeMiddleware(unittest.TestCase):
     def _getFUT(self):
         from repoze.debug.responselogger import make_middleware

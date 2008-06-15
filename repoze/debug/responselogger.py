@@ -13,8 +13,9 @@ class ResponseLoggingMiddleware:
     def __call__(self, environ, start_response):
         rnd = random.randint(0, sys.maxint-1)
 
-        environ['repoze.debug.id'] = rnd
-        environ['repoze.debug.request_begin'] = time.time()
+        debug = environ['repoze.debug'] = {}
+        debug['id'] = rnd
+        debug['begin'] = time.time()
 
         self.log_request(environ)
 
@@ -48,11 +49,14 @@ class ResponseLoggingMiddleware:
     def log_request(self, environ):
         supplement = Supplement(self, environ)
         request_data = supplement.extraData()
-        request_id = environ['repoze.debug.id']
+        debug = environ['repoze.debug']
+        request_id = debug['id']
         out = []
         t = time.ctime()
         out.append('--- REQUEST %s at %s ---' % (request_id, t))
-        out.append('URL: %s' % supplement.source_url)
+        url = supplement.source_url
+        debug['url'] = url
+        out.append('URL: %s' % url)
         out.append('CGI Variables')
         items = request_data[('extra', 'CGI Variables')].items()
         items.sort()
@@ -66,17 +70,20 @@ class ResponseLoggingMiddleware:
         self.logger.info('\n'.join(out))
 
     def log_response(self, environ, status, headers, body):
-        request_id = environ.get('repoze.debug.id')
+        debug = environ.get('repoze.debug', {})
+        request_id = debug.get('id')
         out = [] 
         t = time.ctime()
         end = time.time()
-        start = environ.get('repoze.debug.request_begin')
+        start = debug.get('begin')
         if start:
             duration = end - start
         else:
             duration = '??'
         out.append('--- RESPONSE %s at %s (%0.4f seconds) ---' % (
             request_id, t, duration))
+        url = debug.get('url', '??')
+        out.append('URL: %s' % url)
         out.append('Status: %s' % status)
         out.append('Response Headers')
         cl = None

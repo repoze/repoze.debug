@@ -1,3 +1,7 @@
+Next release
+
+  - Add source url to response logging.
+
 0.2 (2008/06/14)
 
   - Add warning if content-length != body length.

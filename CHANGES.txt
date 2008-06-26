@@ -1,5 +1,11 @@
 Next release
 
+  - Add 'canary' middleware for detecting environment dictionary
+    leaks.  Add to your Paste config via 'egg:repoze.debug#canary'; it
+    takes no arguments.  If refcounts to repoze.debug.canary.Canary
+    grow without bound, you know you are leaking WSGI environment
+    dictionaries.
+
   - Add source url to response logging.
 
 0.2 (2008/06/14)

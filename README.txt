@@ -2,9 +2,6 @@ repoze.debug README
 ===================
 
 Middleware which can help with in-production forensic debugging.
-Currently the only middleware in this package is the responselogger
-middleware, which logs requests and responses to a file for later
-perusal.
 
 Installation
 ------------
@@ -13,6 +10,11 @@ Install using setuptools, e.g. (within a virtualenv)::
 
  $ easy_install repoze.debug
 
+responselogger middleware
+=========================
+
+The responselogger middleware logs requests and responses to a file
+for later perusal.
 
 Configuration via Python
 ------------------------
@@ -112,6 +114,39 @@ the log::
 
   1?9p?:'~?? ?0a???q?J?(I?|;@@???????@?????!?,H? ?H?`?2t???K.LH?`D?
   --- end RESPONSE 860724193 ---
+
+canary middleware
+=================
+
+The 'canary' middleware is middleware that helps you figure out if you
+are leaking WSGI environment dictionary objects.
+
+Configuration via Python
+------------------------
+
+Wire up the middleware in your application::
+
+ from repoze.debug.canary import CanaryMiddleware
+ middleware = CanaryMiddleware(app)
+
+Configuration via Paste
+-----------------------
+
+Wire the canary middleware up into your pipeline::
+
+ [pipeline:main]
+ pipeline = egg:Paste#cgitb
+            egg:repoze.debug#canary
+            myapp
+
+
+Usage
+-----
+
+If refcounts to repoze.debug.canary.Canary grow without bound, you
+know you are leaking WSGI environment dictionaries.  Use e.g. Dozer to
+find reference leaks.
+
 
 Reporting Bugs / Development Versions
 -------------------------------------

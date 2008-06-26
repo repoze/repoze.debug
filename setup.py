@@ -12,7 +12,7 @@
 #
 ##############################################################################
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 import os
 
@@ -57,6 +57,7 @@ setup(name='repoze.debug',
       entry_points = """\
         [paste.filter_app_factory]
         responselogger = repoze.debug.responselogger:make_middleware
+        canary = repoze.debug.canary:make_middleware
       """
       )
 

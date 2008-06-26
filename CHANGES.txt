@@ -1,4 +1,9 @@
-Next release
+0.4 (2008/06/25)
+
+  - Add pdbpm middleware for dropping into the post-mortem debugger
+    upon an exception (copied from repoze.errorlog).
+
+0.3 (2008/06/25)
 
   - Add 'canary' middleware for detecting environment dictionary
     leaks.  Add to your Paste config via 'egg:repoze.debug#canary'; it

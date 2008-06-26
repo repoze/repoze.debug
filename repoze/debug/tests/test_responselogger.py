@@ -73,7 +73,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(len(logger.logged), 2)
         self.failUnless('URL: http://localhost' in logger.logged[1])
 
-class TestMakeMiddleware(unittest.TestCase):
+class TestMakeResponseLoggingMiddleware(unittest.TestCase):
     def _getFUT(self):
         from repoze.debug.responselogger import make_middleware
         return make_middleware

@@ -147,6 +147,31 @@ If refcounts to repoze.debug.canary.Canary grow without bound, you
 know you are leaking WSGI environment dictionaries.  Use e.g. Dozer to
 find reference leaks.
 
+pdbpm middleware
+=================
+
+The 'pdbpm' middleware, when in the WSGI pipeline, will drop your
+(foregrounded) server process into the pdb post-mortem debugger upon
+any exception.
+
+Configuration via Python
+------------------------
+
+Wire up the middleware in your application::
+
+ from repoze.debug.pdbpm import PostMortemDebug
+ middleware = PostMortemDebug(app)
+
+Configuration via Paste
+------------------------
+
+Use the 'egg:repoze.debug#pdbpm' entry point in your Paste
+configuration, eg.::
+
+      [pipeline:main]
+      pipeline = egg:Paste#cgitb
+                 egg:repoze.debug#pdbpm
+                 myapp
 
 Reporting Bugs / Development Versions
 -------------------------------------

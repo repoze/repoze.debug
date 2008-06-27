@@ -1,3 +1,8 @@
+Next release
+
+  - Make debug id monotonically increase from zero instead of using a
+    random debug id.
+
 0.4 (2008/06/25)
 
   - Add pdbpm middleware for dropping into the post-mortem debugger

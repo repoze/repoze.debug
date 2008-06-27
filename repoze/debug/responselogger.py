@@ -1,8 +1,10 @@
-import random
-import sys
 import time
+import threading
 
 from paste.exceptions.errormiddleware import Supplement
+
+rid = -1
+lock = threading.Lock()
 
 class ResponseLoggingMiddleware:
     def __init__(self, app, max_bodylen, logger):
@@ -11,10 +13,15 @@ class ResponseLoggingMiddleware:
         self.logger = logger
 
     def __call__(self, environ, start_response):
-        rnd = random.randint(0, sys.maxint-1)
+        global rid
+        lock.acquire()
+        try:
+            rid = rid + 1
+        finally:
+            lock.release()
 
         debug = environ['repoze.debug'] = {}
-        debug['id'] = rnd
+        debug['id'] = rid
         debug['begin'] = time.time()
 
         self.log_request(environ)

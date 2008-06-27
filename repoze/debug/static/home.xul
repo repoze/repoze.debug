@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<window id="example-window" title="Include Xui" orient="horizontal"
+    xmlns:rz="http://repoze.org/namespaces"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <script src="home.js"/>
+    <vbox flex="1">
+        <tree id="xui-logtree" datasources="/++xui++/data/summary.xml" ref="*" querytype="xml"
+            seltype="single" rows="10" flex="1" onselect="selectEntry();">
+            <treecols>
+                <treecol id="title" primary="true" label="Title" flex="1"/>
+                <treecol id="elapsed" label="Elapsed"/>
+                <treecol id="href" label="href" hidden="false"/>
+            </treecols>
+            <template>
+                <query expr="*"/>
+                <action>
+                    <treechildren>
+                        <treeitem uri="?">
+                            <treerow properties="maybe">
+                                <treecell label="?title"/>
+                                <treecell label="?elapsed"/>
+                                <treecell label="?href"/>
+                            </treerow>
+                        </treeitem>
+                    </treechildren>
+                </action>
+            </template>
+        </tree>
+        <button id="normal" label="Reload" oncommand="reloadSummary();"/>
+    </vbox>
+    <vbox flex="4">
+        <iframe id="selected-entry" flex="1"/>
+    </vbox>
+</window>

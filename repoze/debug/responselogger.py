@@ -2,17 +2,28 @@ import time
 import threading
 
 from paste.exceptions.errormiddleware import Supplement
+from ui import is_gui_url, DebugGui
 
 rid = -1
 lock = threading.Lock()
 
 class ResponseLoggingMiddleware:
-    def __init__(self, app, max_bodylen, logger):
+    def __init__(self, app, max_bodylen, logger, gui_flag):
         self.application = app
         self.max_bodylen = max_bodylen
         self.logger = logger
+        self.gui_flag = gui_flag
 
     def __call__(self, environ, start_response):
+
+        # Hook for the GUI
+        if self.gui_flag is not None:
+            # The INI file had a setting for the URL.
+            # should have
+            if is_gui_url(environ, self.gui_flag):
+                gui = DebugGui(self.application, self, self.gui_flag)
+                return gui(environ, start_response)
+
         global rid
         lock.acquire()
         try:
@@ -152,6 +163,7 @@ def make_middleware(app,
                     max_bodylen='0KB', # all
                     max_logsize='100MB',
                     backup_count='10',
+                    gui_flag=None
                     ):
     """ Paste filter-app converter """
     backup_count = int(backup_count)
@@ -165,4 +177,4 @@ def make_middleware(app,
                                   backupCount=backup_count)
     logger = Logger('repoze.debug.responselogger')
     logger.handlers = [handler]
-    return ResponseLoggingMiddleware(app, max_bodylen, logger)
+    return ResponseLoggingMiddleware(app, max_bodylen, logger, gui_flag)

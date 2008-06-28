@@ -49,9 +49,11 @@ setup(name='repoze.debug',
       zip_safe=False,
       tests_require = [
                'Paste',
+               'WebOb',
                ],
       install_requires = [
                'Paste',
+               'WebOb',
                ],
       test_suite="repoze.debug.tests",
       entry_points = """\

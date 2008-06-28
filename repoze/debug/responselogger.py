@@ -1,39 +1,28 @@
+import math
 import time
 import threading
 
 from paste.exceptions.errormiddleware import Supplement
-from ui import is_gui_url, DebugGui
-
-rid = -1
-lock = threading.Lock()
+from repoze.debug.ui import is_gui_url
+from repoze.debug.ui import DebugGui
 
 class ResponseLoggingMiddleware:
-    def __init__(self, app, max_bodylen, logger, gui_flag):
+    def __init__(self, app, max_bodylen, logger):
         self.application = app
         self.max_bodylen = max_bodylen
         self.logger = logger
-        self.gui_flag = gui_flag
 
     def __call__(self, environ, start_response):
+        if is_gui_url(environ):
+            gui = DebugGui(self)
+            return gui(environ, start_response)
 
-        # Hook for the GUI
-        if self.gui_flag is not None:
-            # The INI file had a setting for the URL.
-            # should have
-            if is_gui_url(environ, self.gui_flag):
-                gui = DebugGui(self.application, self, self.gui_flag)
-                return gui(environ, start_response)
-
-        global rid
-        lock.acquire()
-        try:
-            rid = rid + 1
-        finally:
-            lock.release()
+        now = time.time()
+        request_id = get_request_id(now)
 
         debug = environ['repoze.debug'] = {}
-        debug['id'] = rid
-        debug['begin'] = time.time()
+        debug['id'] = request_id
+        debug['begin'] = now
 
         self.log_request(environ)
 
@@ -157,13 +146,41 @@ byte_size = SuffixMultiplier({'kb': 1024,
                               'mb': 1024*1024,
                               'gb': 1024*1024*1024L,})
 
+_CURRENT_PERIOD = None
+_PERIOD_COUNTER = 0
+
+def get_request_id(when, period=.10, max=10000, lock=threading.Lock()):
+    """
+    We'd like to hand out a request id that is related to UNIX time
+    but more unique than low-resolution timers (e.g. Windows) can give
+    us.  To do so, we keep around 1/10 of a sec worth of history and
+    we keep up to max slots for entries within this period,
+    effectively limiting us to max / period items per second.  In the
+    default configuration, this means we can hand out 100000 rids per
+    second maximum.
+    """
+    this_period = when - (when % period)
+    global _CURRENT_PERIOD
+    global _PERIOD_COUNTER
+    lock.acquire()
+    try:
+        if this_period != _CURRENT_PERIOD:
+            _CURRENT_PERIOD = this_period
+            _PERIOD_COUNTER = 0
+        if _PERIOD_COUNTER > max:
+            raise ValueError('more than %s items within %s period' % period)
+        result = when + (_PERIOD_COUNTER / float(max))
+        _PERIOD_COUNTER += 1
+    finally:
+        lock.release()
+    return result
+
 def make_middleware(app,
                     global_conf,
                     filename,
                     max_bodylen='0KB', # all
                     max_logsize='100MB',
                     backup_count='10',
-                    gui_flag=None
                     ):
     """ Paste filter-app converter """
     backup_count = int(backup_count)
@@ -177,4 +194,4 @@ def make_middleware(app,
                                   backupCount=backup_count)
     logger = Logger('repoze.debug.responselogger')
     logger.handlers = [handler]
-    return ResponseLoggingMiddleware(app, max_bodylen, logger, gui_flag)
+    return ResponseLoggingMiddleware(app, max_bodylen, logger)

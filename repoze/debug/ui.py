@@ -6,19 +6,12 @@ from webob import Request, Response
 import mimetypes
 from webob import exc
 import os
-from urllib import quote
 
 _HERE = os.path.abspath(os.path.dirname(__file__))
+gui_flag = '__repoze.debug'
 
-def is_gui_url(environ, gui_flag):
-    """Tell the logger if the GUI class should take over"""
-
-    req = Request(environ)
-    print gui_flag, quote(gui_flag)
-    if req.url.find(quote(gui_flag)) > -1:
-        return True
-    else:
-        return False
+def is_gui_url(environ):
+    return gui_flag in environ.get('PATH_INFO', '')
 
 def get_mimetype(filename):
     type, encoding = mimetypes.guess_type(filename)
@@ -40,11 +33,9 @@ class FakeLogger(object):
 
 class DebugGui(object):
 
-    def __init__(self, app, logger, gui_flag):
-        self.app = app
+    def __init__(self, logger):
         self.logger = logger
         self.static_dir = os.path.join(_HERE, 'static')
-        self.gui_flag = quote(gui_flag)
 
     def __call__(self, environ, start_response):
         """Pick apart this debug URL and return the correct response"""
@@ -54,9 +45,9 @@ class DebugGui(object):
 
         try:
             # Process the request
-            if req.url.find(self.gui_flag + "/static/") > -1:
+            if req.url.find(gui_flag + "/static/") > -1:
                 resp = self.getStatic(req)
-            elif req.url.find(self.gui_flag + "feed.xml"):
+            elif req.url.find(gui_flag + "feed.xml"):
                 resp = self.getFeed(req)
         except ValueError, e:
             resp = exc.HTTPBadRequest(str(e))
@@ -76,7 +67,6 @@ class DebugGui(object):
         res.body = open(filename, 'rb').read()
 
         return res
-
 
     def getFeed(self, req):
         """Get XML representing information in the logger"""

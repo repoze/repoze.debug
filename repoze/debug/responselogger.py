@@ -8,11 +8,11 @@ from repoze.debug.ui import is_gui_url
 from repoze.debug.ui import DebugGui
 
 class ResponseLoggingMiddleware:
-    def __init__(self, app, max_bodylen, logger, keep_around):
+    def __init__(self, app, max_bodylen, logger, keep):
         self.application = app
         self.max_bodylen = max_bodylen
         self.logger = logger
-        self.keep_around = keep_around
+        self.keep = keep
         self.entries = []
         self.lock = threading.Lock()
 
@@ -27,7 +27,7 @@ class ResponseLoggingMiddleware:
 
         self.lock.acquire()
         try:
-            if len(self.entries) > self.keep_around:
+            if len(self.entries) > self.keep:
                 self.entries.pop(0)
         finally:
             self.lock.release()
@@ -216,13 +216,13 @@ def make_middleware(app,
                     max_bodylen='3KB',
                     max_logsize='100MB',
                     backup_count='10',
-                    keep_around='100',
+                    keep='100',
                     ):
     """ Paste filter-app converter """
     backup_count = int(backup_count)
     max_bytes = byte_size(max_logsize)
     max_bodylen = byte_size(max_bodylen)
-    keep_around = int(keep_around)
+    keep = int(keep)
 
     from logging import Logger
     from logging.handlers import RotatingFileHandler
@@ -231,4 +231,4 @@ def make_middleware(app,
                                   backupCount=backup_count)
     logger = Logger('repoze.debug.responselogger')
     logger.handlers = [handler]
-    return ResponseLoggingMiddleware(app, max_bodylen, logger, keep_around)
+    return ResponseLoggingMiddleware(app, max_bodylen, logger, keep)

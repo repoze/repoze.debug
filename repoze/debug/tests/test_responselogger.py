@@ -109,7 +109,7 @@ class TestMakeResponseLoggingMiddleware(unittest.TestCase):
         mw = f(app, global_conf, fn)
         self.assertEqual(len(mw.logger.handlers), 1)
         self.assertEqual(mw.max_bodylen, 3072)
-        self.assertEqual(mw.keep_around, 100)
+        self.assertEqual(mw.keep, 100)
 
     def test_make_middleware_nondefaults(self):
         f = self._getFUT()
@@ -119,6 +119,8 @@ class TestMakeResponseLoggingMiddleware(unittest.TestCase):
         fn = tempfile.mktemp()
         mw = f(app, global_conf, fn, '0', '0', '0', '0')
         self.assertEqual(len(mw.logger.handlers), 1)
+        self.assertEqual(mw.max_bodylen, 0)
+        self.assertEqual(mw.keep, 0)
 
 class FakeStartResponse:
     def __call__(self, status, headers, exc_info=None):

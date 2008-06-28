@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Demo of what the XML datasource for the left-hand tree 
+looks like.  A browser-side XSLT converts the feed xml into a 
+representation that is easy to present in the tree. -->
+<log>
+    <entry id="n32432" name="/somerequest.html">
+        <item id="n32432" name="App Result"/>
+        <item id="n32432" name="Siteconfig"/>
+        <item id="n32432" name="User"/>
+    </entry>
+    <log id="n32432" name="/anotherone.html">
+        <item id="n32432" name="App Result"/>
+        <item id="n32432" name="Siteconfig"/>
+        <item id="n32432" name="User"/>
+    </log>
+</log>

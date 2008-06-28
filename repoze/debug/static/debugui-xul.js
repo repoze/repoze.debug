@@ -1,14 +1,21 @@
 
-/* */
-var url = "/++xui++/data/summary.xml";
+var url = "../feed.xml";
 var treeid = "xui-logtree";
+var processor;
+var atomdoc;
 
 function asxml (node) {
-
-    var serializer = new XMLSerializer();
-    var xml = serializer.serializeToString(node);
-    return xml;
+    return new XMLSerializer().serializeToString(node);
 }
+
+
+function geturl(url) {
+    var xmlhttp = new XMLHttpRequest();  
+    xmlhttp.open("GET", url, false);  
+    xmlhttp.send('');  
+    return xmlhttp.responseXML;
+}
+
 
 function documentLoaded (e) {
     var tree = document.getElementById(treeid);
@@ -30,17 +37,28 @@ function selectEntry () {
 	iframe.setAttribute("src", href);
     }
 }
-        
+
+
 function reloadSummary () {
+    /* Transform to make XUL trees with XML datasources easier */
+
+    // Grab the target, which is the document element on the tree
     var tree = document.getElementById(treeid);
-    var xmlDoc = tree.builder.datasource;
-        
-    xmlDoc.addEventListener("load", documentLoaded, false);
-    xmlDoc.load(url);
+    var target = tree.builder.datasource.documentElement;
+
+    // Get new data, transform it, and import into the document
+    var result = processor.transformToDocument(geturl("samplefeed.xml"));
+    var iresult = document.importNode(result.documentElement, true);
+
+    // Update the tree datasource and rebuild
+    Sarissa.moveChildNodes(iresult, target);
+    tree.builder.rebuild();
 }
 
 function init () {
-    /* */
+    var xsldoc = geturl("debugui-xul.xsl");
+    processor = new XSLTProcessor();
+    processor.importStylesheet(xsldoc);
 }
 
 document.addEventListener("DOMContentLoaded", init, false);

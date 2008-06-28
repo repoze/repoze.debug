@@ -1,29 +1,28 @@
 
 var processor;
+var url = "../feed.xml";
 
 function asxml (node) {
-    var xmlString = new XMLSerializer().serializeToString(node);
-    return xmlString;
+    return new XMLSerializer().serializeToString(node);
 }
 
-function reloadFeed () {
-    var url = "http://localhost:8090/foo/++debugui++/feed.xml";
+
+function geturl(url) {
     var xmlhttp = new XMLHttpRequest();  
     xmlhttp.open("GET", url, false);  
     xmlhttp.send('');  
-    var feeddoc = xmlhttp.responseXML;
-
-    var frag = processor.transformToFragment(feeddoc, document);
-    var target = document.getElementById("output");
-    Sarissa.clearChildNodes(target);
-    target.appendChild(frag);
+    return xmlhttp.responseXML;
 }
 
+
+function reloadFeed () {
+    var target = document.getElementById("output");
+    Sarissa.updateContentFromURI(url, target, processor);
+}
+
+
 function debuginit () {
-    var xmlhttp = new XMLHttpRequest();  
-    xmlhttp.open("GET", "debugui.xsl", false);  
-    xmlhttp.send('');  
-    var xsldoc = xmlhttp.responseXML;
+    var xsldoc = geturl("debugui.xsl");
     processor = new XSLTProcessor();
     processor.importStylesheet(xsldoc);
 }

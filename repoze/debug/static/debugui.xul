@@ -3,24 +3,25 @@
 <window id="example-window" title="Include Xui" orient="horizontal"
     xmlns:rz="http://repoze.org/namespaces"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-    <script src="home.js"/>
+    <script src="sarissa.js"/>
+    <script src="debugui-xul.js"/>
     <vbox flex="1">
-        <tree id="xui-logtree" datasources="/++xui++/data/summary.xml" ref="*" querytype="xml"
+        <tree id="xui-logtree" datasources="samplelogentries.xml" ref="*" querytype="xml"
             seltype="single" rows="10" flex="1" onselect="selectEntry();">
             <treecols>
                 <treecol id="title" primary="true" label="Title" flex="1"/>
                 <treecol id="elapsed" label="Elapsed"/>
-                <treecol id="href" label="href" hidden="false"/>
+                <treecol id="href" label="href" hidden="true"/>
             </treecols>
             <template>
                 <query expr="*"/>
                 <action>
                     <treechildren>
                         <treeitem uri="?">
-                            <treerow properties="maybe">
-                                <treecell label="?title"/>
-                                <treecell label="?elapsed"/>
-                                <treecell label="?href"/>
+                            <treerow>
+                                <treecell label="?name"/>
+                                <treecell label="?name"/>
+                                <treecell label="?name"/>
                             </treerow>
                         </treeitem>
                     </treechildren>

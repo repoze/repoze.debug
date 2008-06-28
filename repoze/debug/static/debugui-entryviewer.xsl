@@ -4,9 +4,9 @@
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
     <xsl:import href="xmlverbatim.xsl"/>
     <xsl:output indent="yes"/>
-    <xsl:param name="entryid"/>
+    <xsl:variable name="entryid" select="/atom:feed/@selected"/>
     <xsl:template match="/">
-        <xsl:apply-templates select="/atom:feed/atom:entry[atom:id=$entryid]"/>
+        <div><h1>kdkdkd</h1><xsl:apply-templates select="/atom:feed/atom:entry[atom:id=$entryid]"/></div>
     </xsl:template>
     <xsl:template match="atom:entry">
         <div>

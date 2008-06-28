@@ -7,11 +7,11 @@
     <script src="debugui-xul.js"/>
     <vbox flex="1">
         <tree id="xui-logtree" datasources="samplelogentries.xml" ref="*" querytype="xml"
-            seltype="single" rows="10" flex="1" onselect="selectEntry();">
+            seltype="single" rows="10" flex="1">
             <treecols>
                 <treecol id="title" primary="true" label="Title" flex="1"/>
                 <treecol id="elapsed" label="Elapsed"/>
-                <treecol id="href" label="href" hidden="true"/>
+                <treecol id="entryid" label="Entry ID" hidden="true"/>
             </treecols>
             <template>
                 <query expr="*"/>
@@ -20,15 +20,15 @@
                         <treeitem uri="?">
                             <treerow>
                                 <treecell label="?name"/>
-                                <treecell label="?name"/>
-                                <treecell label="?name"/>
+                                <treecell label="?elapsed"/>
+                                <treecell class="entryid" label="?entryid"/>
                             </treerow>
                         </treeitem>
                     </treechildren>
                 </action>
             </template>
         </tree>
-        <button id="normal" label="Reload" oncommand="reloadSummary();"/>
+        <button id="reloadEntries" label="Reload"/>
     </vbox>
     <vbox flex="4">
         <iframe id="selected-entry" flex="1"/>

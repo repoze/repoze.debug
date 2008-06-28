@@ -10,14 +10,14 @@
     <entry>
         <id>urn:uuid:20323</id>
         <title>My Entry</title>
-        <link href="http://example.org/2003/12/13/atom03"/>
+        <link href="http://www.google.com/"/>
         <updated>2003-12-13T18:30:02Z</updated>
         <summary>Some text.</summary>
     </entry>
     <entry>
         <id>urn:uuid:32736</id>
         <title>Second Entry</title>
-        <link href="http://example.org/2003/12/13/atom03"/>
+        <link href="http://www.mozilla.org/"/>
         <updated>2003-12-13T18:30:02Z</updated>
         <summary>Some text.</summary>
     </entry>

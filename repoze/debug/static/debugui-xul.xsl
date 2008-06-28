@@ -6,10 +6,10 @@ Firefox 3 XML datasources attached to XUL trees and whatnot. -->
     <xsl:template match="/">
         <log>
             <xsl:for-each select="/atom:feed/atom:entry">
-                <entry id="n32432" name="/somerequest.html">
-                    <item id="n32432" name="xxApp Result"/>
-                    <item id="n32432" name="Siteconfig"/>
-                    <item id="n32432" name="User"/>
+                <entry entryid="{atom:id}" name="/somerequest.html" elapsed="22.0">
+                    <item entryid="{atom:id}-1" name="App Result" elapsed="4.3"/>
+                    <item entryid="{atom:id}-2" name="Siteconfig" elapsed="3.9"/>
+                    <item entryid="{atom:id}-3" name="User" elapsed="0.8"/>
                 </entry>
             </xsl:for-each>
         </log>

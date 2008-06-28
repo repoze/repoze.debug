@@ -1,12 +1,25 @@
 
 var gm;
+var cl = console.log;
 
-function GuiModel (treeid, atomurl) {
-    this.treeid = treeid;
-    this.atomurl = atomurl;
-    this.tree = document.getElementById(treeid);
+function GuiModel (tree_id, atom_url) {
+    this.tree_id = tree_id;
+    this.atom_url = atom_url;
+    this.tree = document.getElementById(tree_id);
     this.processor = null;
-    this.atomdoc = null;
+    this.atom_doc = null;
+    this.curr_tree_selection = 0;
+    this.ns = {
+	'xhtml' : 'http://www.w3.org/1999/xhtml',
+	'mathml': 'http://www.w3.org/1998/Math/MathML',
+	'atom'  : 'http://www.w3.org/2005/Atom',
+    };
+
+
+    // Register handlers
+    this.tree.addEventListener("select", this.selectEntry, false);
+    var btn = document.getElementById("reloadEntries");
+    btn.addEventListener("command", this.reloadModel, false);
 }
 
 GuiModel.prototype.tostring = function (node) {
@@ -26,6 +39,7 @@ GuiModel.prototype.loadURL = function (url) {
     return xmlhttp.responseXML;
 }
 
+
 GuiModel.prototype.loadProcessor = function (xslurl) {
     /* Load the XSLT that massages Atom-data into XML datasources */
 
@@ -35,6 +49,7 @@ GuiModel.prototype.loadProcessor = function (xslurl) {
 }
 
 
+
 GuiModel.prototype.reloadModel = function () {
     /* Fetch the atom data, then update various trees */
 
@@ -42,26 +57,42 @@ GuiModel.prototype.reloadModel = function () {
     var target = this.tree.builder.datasource.documentElement;
 
     // Get new data, transform it, and import into the document
-    var atomdoc = this.loadURL(this.atomurl);
-    var result = this.processor.transformToDocument(atomdoc);
+    this.atom_doc = this.loadURL(this.atom_url);
+    var result = this.processor.transformToDocument(this.atom_doc);
     var iresult = document.importNode(result.documentElement, true);
 
     // Update the tree datasource and rebuild
     Sarissa.moveChildNodes(iresult, target);
     this.tree.builder.rebuild();
+
+    // Reset the selection to the last-known selection
+    this.tree.view.selection.select(this.curr_tree_selection);
+    this.tree.view.toggleOpenState(this.curr_tree_selection);
 }
 
-function documentLoaded (e) {
-    var tree = document.getElementById(treeid);
-    tree.builder.rebuild();
 
-    // Mark the first item as selected
-    tree.view.selection.select(0);
-    tree.view.toggleOpenState(0);
+GuiModel.prototype.selectEntry = function (e) {
+    /* Activate the right-hand side */
+
+    var item = gm.tree.view.getItemAtIndex(gm.tree.currentIndex);
+    var entrynode = item.getElementsByClassName("entryid")[0];
+    var entryid = entrynode.getAttribute("label");
+    gm.curr_entryid = entryid;
+    gm.curr_tree_selection = gm.tree.view.selection.currentIndex;
+
+    // Change the browser url on the right
+    var this_id = "urn:uuid:32736";
+    var xp = "/*/atom:entry[atom:id='" + entryid + "']/atom:link";
+    var href= selectSingleNode(xp).getAttribute("href");
+    var iframe = document.getElementById("selected-entry");
+    iframe.setAttribute("src", href);
+
 }
 
 
 function initGuiModel () {
+    /* Run on document load by the DOMContentLoaded listener below */
+
     if (window.location.host.indexOf(":") == -1){
 	// Running from FS, not dynamicall via WSGI, use dummy data
 	var atom_url = "samplefeed.xml";
@@ -76,15 +107,41 @@ function initGuiModel () {
 document.addEventListener("DOMContentLoaded", initGuiModel, false);
 
 
-function selectEntry () {
-    var tree = document.getElementById(treeid);
-    var item = tree.view.getItemAtIndex(tree.currentIndex);
-    var hrefcell = item.childNodes[0].childNodes[2];
-    if (hrefcell.hasAttribute("label")) {
-	// Change the browser url on the right
-	var href = hrefcell.getAttribute("label");
-	var iframe = document.getElementById("selected-entry");
-	iframe.setAttribute("src", href);
-    }
-}
 
+/* Companion functions, stolen from Sarissa */
+
+function selectNodes (sExpr, returnSingle) {
+    var nsDoc = gm.atom_doc;
+    function nsresolver(prefix) {
+	return gm.ns[prefix] || null;
+    }
+    var result = null;
+    if(!returnSingle){
+        var oResult = nsDoc.evaluate(sExpr,
+            nsDoc,
+            nsresolver,
+            XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        var nodeList = new SarissaNodeList(oResult.snapshotLength);
+        nodeList.expr = sExpr;
+        for(var i=0;i<nodeList.length;i++){
+            nodeList[i] = oResult.snapshotItem(i);
+        }
+        result = nodeList;
+    }
+    else {
+	var xf = XPathResult.FIRST_ORDERED_NODE_TYPE;
+        result = nsDoc.evaluate(sExpr,
+			       nsDoc,
+			       nsresolver,
+			       xf, null).singleNodeValue;
+    }
+    return result;      
+};
+
+function selectSingleNode (sExpr) {
+    return selectNodes(sExpr, true);
+}
+ 
+function SarissaNodeList (i) {
+    this.length = i;
+};

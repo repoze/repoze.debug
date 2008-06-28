@@ -141,6 +141,7 @@ class ResponseLoggingMiddleware:
                 out.append(
                     'WARNING-1: bodylen (%s) != Content-Length '
                     'header value (%s)' % (bodylen, cl))
+        response_info['body'] = bodyout
         response_info['end'] = time.time()
         duration = response_info['end'] - request_info['begin']
         out.append('--- end RESPONSE for %s (%0.2f seconds) ---' % (

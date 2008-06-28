@@ -1,24 +1,120 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" title="One">
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:rz="http://repoze.org/namespace">
     <title>Example Feed</title>
     <link href="http://example.org/"/>
     <updated>2003-12-13T18:30:02Z</updated>
     <author>
         <name>John Doe</name>
     </author>
-    <id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>
+    <id>urn:uuid:60a76c80-d399-11d9-b93C-0003a39e9bf6</id>
+    <updated>2003-12-13T18:30:02Z</updated>
+
     <entry>
         <id>urn:uuid:20323</id>
-        <title>My Entry</title>
+        <title>/profile/chris/edit.html</title>
         <link href="http://www.google.com/"/>
-        <updated>2003-12-13T18:30:02Z</updated>
-        <summary>Some text.</summary>
+        <updated>2003-12-13T18:31:01Z</updated>
+        <content>
+            <rz:entry elapsed="32.0">
+                <rz:request/>
+                <rz:response tid="1744480">
+                    <rz:body>
+                        <response>
+                            <view id="profile-edit">
+                                <formcontroller type="Profile" mode="edit"/>
+                            </view>
+                        </response>
+                    </rz:body>
+                </rz:response>
+            </rz:entry>
+        </content>
     </entry>
     <entry>
-        <id>urn:uuid:32736</id>
-        <title>Second Entry</title>
-        <link href="http://www.mozilla.org/"/>
-        <updated>2003-12-13T18:30:02Z</updated>
-        <summary>Some text.</summary>
+        <id>urn:uuid:a1</id>
+        <title>/typedefs.xml</title>
+        <updated>2003-12-13T18:31:02Z</updated>
+        <content>
+            <rz:entry elapsed="0.9">
+                <rz:request tid="1744480"/>
+                <rz:response>
+                    <rz:body>
+                        <typedefs>
+                            <title>Paul Everitt</title>
+                        </typedefs>
+                    </rz:body>
+                </rz:response>
+            </rz:entry>
+        </content>
+    </entry>
+    <entry>
+        <id>urn:uuid:a2</id>
+        <title>/user.xml</title>
+        <updated>2003-12-13T18:31:03Z</updated>
+        <content>
+            <rz:entry elapsed="12.7">
+                <rz:request tid="1744480"/>
+                <rz:response>
+                    <rz:body>
+                        <user>
+                            <title>Paul Everitt</title>
+                        </user>
+                    </rz:body>
+                </rz:response>
+            </rz:entry>
+        </content>
+    </entry>
+
+
+
+
+    <entry>
+        <id>urn:uuid:734661</id>
+        <title>/communities</title>
+        <updated>2003-12-13T18:31:04Z</updated>
+        <content>
+            <rz:entry elapsed="23.1">
+                <rz:response tid="92394480">
+                    <rz:body>
+                        <user>
+                            <title>Paul Everitt</title>
+                        </user>
+                    </rz:body>
+                </rz:response>
+            </rz:entry>
+        </content>
+    </entry>
+    <entry>
+        <id>urn:uuid:b2</id>
+        <title>/user.xml</title>
+        <updated>2003-12-13T18:31:05Z</updated>
+        <content>
+            <rz:entry elapsed="14.9">
+                <rz:request tid="92394480"/>
+                <rz:response>
+                    <rz:body>
+                        <user>
+                            <title>Chris McDonough</title>
+                        </user>
+                    </rz:body>
+                </rz:response>
+            </rz:entry>
+        </content>
+    </entry>
+    <entry>
+        <id>urn:uuid:b3</id>
+        <title>siteconfig.xml</title>
+        <updated>2003-12-13T18:31:06Z</updated>
+        <content>
+            <rz:entry elapsed="4.8">
+                <rz:request tid="92394480"/>
+                <rz:response>
+                    <rz:body>
+                        <siteconfig>
+                            <office>New York City</office>
+                        </siteconfig>
+                    </rz:body>
+                </rz:response>
+            </rz:entry>
+        </content>
     </entry>
 </feed>

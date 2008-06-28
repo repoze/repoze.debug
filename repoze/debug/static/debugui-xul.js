@@ -1,12 +1,13 @@
 
 var gm;
-var cl = console.log;
 
 function GuiModel (tree_id, atom_url) {
     this.tree_id = tree_id;
     this.atom_url = atom_url;
     this.tree = document.getElementById(tree_id);
+    this.viewer = document.getElementById("selected-entry");
     this.processor = null;
+    this.viewerprocessor = null;
     this.atom_doc = null;
     this.curr_tree_selection = 0;
     this.ns = {
@@ -35,6 +36,7 @@ GuiModel.prototype.loadURL = function (url) {
 
     var xmlhttp = new XMLHttpRequest();  
     xmlhttp.open("GET", url, false);  
+    xmlhttp.setRequestHeader("Cache-Control","no-cache");
     xmlhttp.send('');
     return xmlhttp.responseXML;
 }
@@ -49,25 +51,33 @@ GuiModel.prototype.loadProcessor = function (xslurl) {
 }
 
 
+GuiModel.prototype.loadViewerProcessor = function (xslurl) {
+    /* Load the XSLT that views selected entries */
+
+    this.viewerxsldoc = this.loadURL(xslurl);
+    this.viewerprocessor = new XSLTProcessor();
+    this.viewerprocessor.importStylesheet(this.viewerxsldoc);
+}
+
 
 GuiModel.prototype.reloadModel = function () {
     /* Fetch the atom data, then update various trees */
 
     // Grab the target, which is the document element on the tree
-    var target = this.tree.builder.datasource.documentElement;
+    var target = gm.tree.builder.datasource.documentElement;
 
     // Get new data, transform it, and import into the document
-    this.atom_doc = this.loadURL(this.atom_url);
-    var result = this.processor.transformToDocument(this.atom_doc);
+    gm.atom_doc = gm.loadURL(gm.atom_url);
+    var result = gm.processor.transformToDocument(gm.atom_doc);
     var iresult = document.importNode(result.documentElement, true);
 
     // Update the tree datasource and rebuild
     Sarissa.moveChildNodes(iresult, target);
-    this.tree.builder.rebuild();
+    gm.tree.builder.rebuild();
 
     // Reset the selection to the last-known selection
-    this.tree.view.selection.select(this.curr_tree_selection);
-    this.tree.view.toggleOpenState(this.curr_tree_selection);
+    gm.tree.view.selection.select(0);
+    gm.tree.view.toggleOpenState(0);
 }
 
 
@@ -80,13 +90,11 @@ GuiModel.prototype.selectEntry = function (e) {
     gm.curr_entryid = entryid;
     gm.curr_tree_selection = gm.tree.view.selection.currentIndex;
 
-    // Change the browser url on the right
-    var this_id = "urn:uuid:32736";
-    var xp = "/*/atom:entry[atom:id='" + entryid + "']/atom:link";
-    var href= selectSingleNode(xp).getAttribute("href");
-    var iframe = document.getElementById("selected-entry");
-    iframe.setAttribute("src", href);
-
+    // Change the contents of the viewer
+    gm.viewerprocessor.setParameter(null, "entryid", entryid);
+    var result = gm.viewerprocessor.transformToDocument(gm.atom_doc);
+    var iresult = document.importNode(result.documentElement, true);
+    Sarissa.moveChildNodes(iresult, gm.viewer); 
 }
 
 
@@ -101,6 +109,7 @@ function initGuiModel () {
     }
     gm = new GuiModel("xui-logtree", atom_url);
     gm.loadProcessor("debugui-xul.xsl");
+    gm.loadViewerProcessor("debugui-entryviewer.xsl");
     gm.reloadModel();
 }
 

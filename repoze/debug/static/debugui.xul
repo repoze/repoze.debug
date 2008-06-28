@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="debugui.css" type="text/css"?>
 <window id="example-window" title="Include Xui" orient="horizontal"
-    xmlns:rz="http://repoze.org/namespaces"
+    xmlns:html="http://www.w3.org/1999/xhtml" xmlns:rz="http://repoze.org/namespaces"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     <script src="sarissa.js"/>
     <script src="debugui-xul.js"/>
     <vbox flex="1">
         <tree id="xui-logtree" datasources="samplelogentries.xml" ref="*" querytype="xml"
-            seltype="single" rows="10" flex="1">
+            seltype="single" rows="10" flex="1" maxwidth="250" minwidth="250">
             <treecols>
                 <treecol id="title" primary="true" label="Title" flex="1"/>
                 <treecol id="elapsed" label="Elapsed"/>
@@ -31,6 +32,9 @@
         <button id="reloadEntries" label="Reload"/>
     </vbox>
     <vbox flex="4">
-        <iframe id="selected-entry" flex="1"/>
+        <html:div id="selected-entry" flex="1">
+            <html:h1>Yes</html:h1>
+            <html:p>no</html:p>
+        </html:div>
     </vbox>
 </window>

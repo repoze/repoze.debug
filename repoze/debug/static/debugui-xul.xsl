@@ -1,17 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Convert the feed into various representations used for 
 Firefox 3 XML datasources attached to XUL trees and whatnot. -->
-<xsl:stylesheet xmlns:atom="http://www.w3.org/2005/Atom" exclude-result-prefixes="atom"
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    <xsl:template match="/">
+<xsl:stylesheet xmlns:atom="http://www.w3.org/2005/Atom" xmlns:rz="http://repoze.org/namespace"
+    exclude-result-prefixes="atom rz" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+    <xsl:output indent="yes"/>
+    <xsl:key name="getsubentry" match="atom:entry" use="atom:content/rz:entry/rz:request/@tid"/>
+    <xsl:template match="/" priority="99">
+        <xsl:choose>
+            <xsl:when test="/atom:feed">
+                <xsl:apply-templates select="atom:feed" mode="tree"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <main><!--<xsl:apply-templates select="." mode="viewer"/>--></main>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    <xsl:template match="atom:feed" mode="tree">
+        <!-- Recurse into the feed and make data to load into the tree -->
         <log>
-            <xsl:for-each select="/atom:feed/atom:entry">
-                <entry entryid="{atom:id}" name="/somerequest.html" elapsed="22.0">
-                    <item entryid="{atom:id}-1" name="App Result" elapsed="4.3"/>
-                    <item entryid="{atom:id}-2" name="Siteconfig" elapsed="3.9"/>
-                    <item entryid="{atom:id}-3" name="User" elapsed="0.8"/>
-                </entry>
-            </xsl:for-each>
+            <xsl:apply-templates select="atom:entry[atom:content/rz:entry/rz:response/@tid]"
+                mode="entry"/>
         </log>
+    </xsl:template>
+    <xsl:template match="atom:entry" mode="entry">
+        <!-- The parent request is the one with a @tid on the response -->
+        <entry entryid="{atom:id}" name="{atom:title}" elapsed="{atom:content/rz:entry/@elapsed}">
+            <xsl:variable name="thistid" select="atom:content/rz:entry/rz:response/@tid"/>
+            <xsl:apply-templates select="key('getsubentry', $thistid)" mode="item"/>
+            <!-- <xsl:apply-templates
+                select="/atom:feed/atom:entry[atom:content/rz:entry/rz:request/@tid=$thistid]" mode="item"/>-->
+        </entry>
+    </xsl:template>
+    <xsl:template match="atom:entry" mode="item">
+        <item entryid="{atom:id}" name="{atom:title}" elapsed="{atom:content/rz:entry/@elapsed}"/>
     </xsl:template>
 </xsl:stylesheet>

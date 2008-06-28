@@ -15,7 +15,8 @@ def is_gui_url(environ):
 
 def get_mimetype(filename):
     type, encoding = mimetypes.guess_type(filename)
-    # We'll ignore encoding, even though we shouldn't really
+    if type is None and filename.endswith(".xul"):
+        return 'application/vnd.mozilla.xul+xml'
     return type or 'application/octet-stream'
 
 

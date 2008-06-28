@@ -1,7 +1,15 @@
 Next release
 
-  - Make debug id monotonically increase from zero instead of using a
+  - Make debug request id reflect approximate UNIX time rather than a
     random debug id.
+
+  - Deal with responses via a generator; don't unwind response bodies
+    into memory.
+
+  - Default max_bodysize is now 3K rather than the entire response
+    body.
+
+  - User interface; keep entries around to show in GUI.
 
 0.4 (2008/06/25)
 

@@ -19,22 +19,17 @@ def get_mimetype(filename):
     return type or 'application/octet-stream'
 
 
-class FakeLogger(object):
-    
-    def getEntries(self):
-
-        data = [
-            {'id': '20323', 'title': 'My Entry'},
-            {'id': '32736', 'title': 'Second Entry'},
-            ]
-
-        return data
+class FakeMiddleware(object):
+    entries = [
+        {'id': '20323', 'title': 'My Entry'},
+        {'id': '32736', 'title': 'Second Entry'},
+        ]
 
 
 class DebugGui(object):
 
-    def __init__(self, logger):
-        self.logger = logger
+    def __init__(self, middleware):
+        self.middleware = middleware
         self.static_dir = os.path.join(_HERE, 'static')
 
     def __call__(self, environ, start_response):
@@ -69,10 +64,9 @@ class DebugGui(object):
         return res
 
     def getFeed(self, req):
-        """Get XML representing information in the logger"""
+        """Get XML representing information in the middleware"""
 
-        logger = FakeLogger()
-        entries = logger.getEntries()
+        entries = self.middleware.entries
 
         feedfmt = """<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">

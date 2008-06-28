@@ -1,4 +1,3 @@
-import math
 import time
 import threading
 
@@ -168,7 +167,7 @@ def get_request_id(when, period=.10, max=10000, lock=threading.Lock()):
             _CURRENT_PERIOD = this_period
             _PERIOD_COUNTER = 0
         if _PERIOD_COUNTER > max:
-            raise ValueError('more than %s items within %s period' % period)
+            raise ValueError('> %s items within %s period' % (max, period))
         result = when + (_PERIOD_COUNTER / float(max))
         _PERIOD_COUNTER += 1
     finally:

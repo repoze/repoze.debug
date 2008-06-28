@@ -71,10 +71,6 @@ function initGuiModel () {
     gm = new GuiModel("xui-logtree", atom_url);
     gm.loadProcessor("debugui-xul.xsl");
     gm.reloadModel();
-    return;
-    var xsldoc = geturl("debugui-xul.xsl");
-    processor = new XSLTProcessor();
-    processor.importStylesheet(xsldoc);
 }
 
 document.addEventListener("DOMContentLoaded", initGuiModel, false);

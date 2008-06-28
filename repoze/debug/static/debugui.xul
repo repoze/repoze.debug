@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="debugui.css" type="text/css"?>
+<?xml-stylesheet href="debugui-xul.css" type="text/css"?>
+<?xml-stylesheet href="debugui-shared.css" type="text/css"?>
 <window id="example-window" title="Include Xui" orient="horizontal"
     xmlns:html="http://www.w3.org/1999/xhtml" xmlns:rz="http://repoze.org/namespaces"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">

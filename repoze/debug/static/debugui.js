@@ -16,7 +16,7 @@ function geturl(url) {
 
 
 function reloadFeed () {
-    var target = document.getElementById("output");
+    var target = document.getElementById("tree");
     Sarissa.updateContentFromURI(url, target, processor);
 }
 

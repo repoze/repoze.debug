@@ -17,29 +17,29 @@ class ResponseLoggingMiddleware:
         self.lock = threading.Lock()
 
     def __call__(self, environ, start_response):
+        now = time.time()
+
         if is_gui_url(environ):
-            self.lock.acquire()
-            try:
-                gui = DebugGui(self)
-                return gui(environ, start_response)
-            finally:
-                self.lock.release()
+            gui = DebugGui(self)
+            return gui(environ, start_response)
+
+        request_id = get_request_id(now)
+
+        request_info = self.get_request_info(environ)
+        request_info['begin'] = now
+        self.log_request_begin(request_id, request_info)
+
+        entry = {}
+        entry['id'] = request_id
+        entry['request'] = request_info
 
         self.lock.acquire()
         try:
             if len(self.entries) > self.keep:
                 self.entries.pop(0)
+            self.entries.append(entry)
         finally:
             self.lock.release()
-
-        now = time.time()
-        request_id = get_request_id(now)
-
-        debug = environ['repoze.debug'] = {}
-        debug['id'] = request_id
-        debug['begin'] = now
-
-        self.log_request(environ)
 
         catch_response = []
         written = []
@@ -50,7 +50,7 @@ class ResponseLoggingMiddleware:
             return written.append
 
         app_iter = self.application(environ, replace_start_response)
-        body = itertools.chain(written, app_iter)
+        received_response = time.time()
 
         if catch_response:
             status, headers = catch_response[0]
@@ -58,75 +58,69 @@ class ResponseLoggingMiddleware:
             status = '500 Start Response Not Called'
             headers = []
 
-        body = self.log_response(environ, status, headers, body)
+        response_info = self.get_response_info(status, headers)
+        response_info['begin'] = received_response
+
+        entry['response'] = response_info
+
+        body = itertools.chain(written, app_iter)
+        body = self.log_response(request_id, request_info, response_info, body)
 
         if hasattr(app_iter, 'close'):
             app_iter.close()
 
         return body
 
-    def _add_request_data(self, environ):
+    def get_request_info(self, environ):
+        info = {}
         supplement = Supplement(self, environ)
         request_data = supplement.extraData()
-        entry = environ['repoze.debug']
-        entry['url'] = supplement.source_url
-        entry['cgi_variables'] = []
-        entry['wsgi_variables'] = []
+        method = environ.get('REQUEST_METHOD', 'GET')
+        info['method'] = method
+        info['url'] = supplement.source_url
+        info['cgi_variables'] = []
+        info['wsgi_variables'] = []
         for k, v in sorted(request_data[('extra', 'CGI Variables')].items()):
-            entry['cgi_variables'].append((k, v))
+            info['cgi_variables'].append((k, v))
         for k, v in sorted(request_data[('extra', 'WSGI Variables')].items()):
             if not 'repoze.debug' in k:
-                entry['wsgi_variables'].append((k, v))
-        return entry
+                info['wsgi_variables'].append((k, v))
+        return info
 
-    def log_request(self, environ):
-        entry = self._add_request_data(environ)
-        request_id = entry['id']
+    def log_request_begin(self, request_id, info):
         out = []
-        t = time.ctime()
-        out.append('--- REQUEST %s at %s ---' % (request_id, t))
-        out.append('URL: %s' % entry['url'])
+        t = time.ctime(info['begin'])
+        out.append('--- begin REQUEST for %s at %s ---' % (request_id, t))
+        out.append('URL: %s %s' % (info['method'], info['url']))
         out.append('CGI Variables')
-        for k, v in entry['cgi_variables']:
+        for k, v in info['cgi_variables']:
             out.append('  %s: %s' % (k, v))
         out.append('WSGI Variables')
-        for k, v in entry['wsgi_variables']:
+        for k, v in info['wsgi_variables']:
             out.append('  %s: %s' % (k, v))
-        out.append('--- end REQUEST %s ---' % request_id)
+        out.append('--- end REQUEST for %s ---' % request_id)
         self.logger.info('\n'.join(out))
 
-    def _add_response_data(self, environ, status, headers):
-        entry = environ.get('repoze.debug', {})
-        end = time.time()
-        entry['end'] = end
+    def get_response_info(self, status, headers):
+        info = {}
         cl = header_value(headers, 'content-length')
-        entry['response_headers'] = list(headers)
+        info['headers'] = list(headers)
         try:
             cl = int(cl)
         except (TypeError, ValueError):
             cl = None
-        entry['content-length'] = cl
-        entry['status'] = status
-        method = environ.get('REQUEST_METHOD', 'GET')
-        entry['title'] = '%s %s' % (method, entry.get('url', '??'))
-        return entry
-
-    def log_response(self, environ, status, headers, body):
-        entry = self._add_response_data(environ, status, headers)
-        request_id = entry.get('id')
-        out = [] 
-        start, end = entry.get('begin'), entry.get('end')
-        if start and end:
-            duration = end - start
-        else:
-            duration = '??'
-        t = time.asctime(time.localtime(end))
-        out.append('--- RESPONSE %s at %s (%0.4f seconds) ---' % (
-            request_id, t, duration))
-        out.append('URL: %s' % entry.get('url', '??'))
-        out.append('Status: %s' % status)
+        info['content-length'] = cl
+        info['status'] = status
+        return info
+    
+    def log_response(self, request_id, request_info, response_info, body):
+        out = []
+        t = time.ctime(response_info['begin'])
+        out.append('--- begin RESPONSE for %s at %s ---' % (request_id, t))
+        out.append('URL: %s %s' % (request_info['method'], request_info['url']))
+        out.append('Status: %s' % response_info['status'])
         out.append('Response Headers')
-        for k, v in entry['response_headers']:
+        for k, v in response_info['headers']:
             out.append('  %s: %s' % (k, v))
         bodyout = ''
         bodylen = 0
@@ -138,22 +132,20 @@ class ResponseLoggingMiddleware:
             bodylen += len(chunk)
             yield chunk
         if bodylen > self.max_bodylen:
-            bodyout += ' ... (truncated)'
+            bodyout += ' ... (truncated at %s bytes)' % self.max_bodylen
         out.append('Body:\n' + bodyout)
         out.append('Bodylen: %s' % bodylen)
-        cl = entry['content-length']
+        cl = response_info['content-length']
         if cl is not None:
             if bodylen != cl:
                 out.append(
                     'WARNING-1: bodylen (%s) != Content-Length '
                     'header value (%s)' % (bodylen, cl))
-        out.append('--- end RESPONSE %s ---' % request_id)
+        response_info['end'] = time.time()
+        duration = response_info['end'] - request_info['begin']
+        out.append('--- end RESPONSE for %s (%0.2f seconds) ---' % (
+            request_id, duration))
         self.logger.info('\n'.join(out))
-        self.lock.acquire()
-        try:
-            self.entries.append(entry)
-        finally:
-            self.lock.release()
         
 class SuffixMultiplier:
     # d is a dictionary of suffixes to integer multipliers.  If no suffixes

@@ -47,7 +47,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(logger.logged), 2)
-        self.failUnless('(truncated)' in logger.logged[1])
+        self.failUnless('(truncated at 1 bytes)' in logger.logged[1])
 
     def test_call_contentlengthwrong(self):
         body = ['thebody']
@@ -71,7 +71,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(logger.logged), 2)
-        self.failUnless('URL: http://localhost' in logger.logged[1])
+        self.failUnless('URL: GET http://localhost' in logger.logged[1])
 
     def test_entry_created(self):
         body = ['thebody']
@@ -84,15 +84,16 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(mw.entries), 1)
         entry = mw.entries[0]
-        self.assertEqual(entry['status'], '200 OK')
-        self.failUnless(isinstance(entry['begin'], float))
-        self.failUnless(isinstance(entry['end'], float))
-        self.assertEqual(entry['response_headers'],
+        self.assertEqual(entry['response']['status'], '200 OK')
+        self.failUnless(isinstance(entry['request']['begin'], float))
+        self.failUnless(isinstance(entry['response']['begin'], float))
+        self.failUnless(isinstance(entry['response']['end'], float))
+        self.assertEqual(entry['response']['headers'],
                          [('Content-Length', '1')])
-        self.assertEqual(entry['url'], 'http://localhost')
-        self.assertEqual(entry['content-length'], 1)
-        self.assertEqual(len(entry['cgi_variables']), 2)
-        self.assertEqual(len(entry['wsgi_variables']), 2)
+        self.assertEqual(entry['request']['url'], 'http://localhost')
+        self.assertEqual(entry['response']['content-length'], 1)
+        self.assertEqual(len(entry['request']['cgi_variables']), 2)
+        self.assertEqual(len(entry['request']['wsgi_variables']), 2)
         self.failUnless(isinstance(entry['id'], float))
 
 class TestMakeResponseLoggingMiddleware(unittest.TestCase):

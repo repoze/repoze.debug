@@ -5,15 +5,8 @@ Firefox 3 XML datasources attached to XUL trees and whatnot. -->
     exclude-result-prefixes="atom rz" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
     <xsl:output indent="yes"/>
     <xsl:key name="getsubentry" match="atom:entry" use="atom:content/rz:entry/rz:request/@tid"/>
-    <xsl:template match="/" priority="99">
-        <xsl:choose>
-            <xsl:when test="/atom:feed">
+    <xsl:template match="/">
                 <xsl:apply-templates select="atom:feed" mode="tree"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <main><!--<xsl:apply-templates select="." mode="viewer"/>--></main>
-            </xsl:otherwise>
-        </xsl:choose>
     </xsl:template>
     <xsl:template match="atom:feed" mode="tree">
         <!-- Recurse into the feed and make data to load into the tree -->

@@ -6,16 +6,24 @@
         <title>repoze.debug GUI</title>
         <link rel="stylesheet" type="text/css" href="debugui-html.css"/>
         <link rel="stylesheet" type="text/css" href="debugui-shared.css"/>
-        <script type="text/javascript" src="debugui.js">
-            /**/</script>
         <script type="text/javascript" src="sarissa.js">
             /**/</script>
+        <script type="text/javascript" src="debugui-shared.js">
+            /**/</script>
+        <script type="text/javascript" src="debugui-html.js">
+            /**/</script>
     </head>
-    <body onload="debuginit();">
+    <body onload="initGuiModel();">
         <div id="lhc">
-            <div id="tree" style="height:95%">x</div>
-            <button onclick="reloadFeed();">Reload</button>
+            <div id="logtree">x</div>
+            <button id="reloadEntries" onclick="gm.reloadModel();">Reload</button>
         </div>
-        <div id="selected-entry">x</div>
+        <div id="selected-entry">
+            <h1>repoze.debug Browser</h1>
+            <p>Click on an entry on the left to browse it. Click the reload button at the bottom
+                right to update from the remote data.</p>
+            <p>Note: To simulate changing the server, open <code>samplefeed.xml</code> and edit one
+                of the title elements.</p>
+        </div>
     </body>
 </html>

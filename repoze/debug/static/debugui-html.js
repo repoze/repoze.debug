@@ -1,4 +1,3 @@
-
 var gm;
 
 function GuiModel (tree_id, atom_url) {
@@ -16,12 +15,10 @@ function GuiModel (tree_id, atom_url) {
 	'atom'  : 'http://www.w3.org/2005/Atom',
     };
 
-
     // Register handlers
-    this.tree.addEventListener("select", this.selectEntry, false);
-    var btn = document.getElementById("reloadEntries");
-    btn.addEventListener("command", this.reloadModel, false);
+    this.tree.addEventListener("click", this.selectEntry, false);
 }
+
 
 GuiModel.prototype.tostring = function (node) {
     /* Dump a document or node to a string representation */
@@ -63,43 +60,29 @@ GuiModel.prototype.loadViewerProcessor = function (xslurl) {
 GuiModel.prototype.reloadModel = function () {
     /* Fetch the atom data, then update various trees */
 
-    // Grab the target, which is the document element on the tree
-    var target = gm.tree.builder.datasource.documentElement;
+    Sarissa.updateContentFromURI(gm.atom_url, gm.tree, gm.processor);
 
-    // Get new data, transform it, and import into the document
-    gm.atom_doc = gm.loadURL(gm.atom_url);
-    var result = gm.processor.transformToDocument(gm.atom_doc);
-    var iresult = document.importNode(result.documentElement, true);
-
-    // Update the tree datasource and rebuild
-    Sarissa.moveChildNodes(iresult, target);
-    gm.tree.builder.rebuild();
-
-    // Reset the selection to the last-known selection
-    gm.tree.view.selection.select(0);
-    gm.tree.view.toggleOpenState(0);
 }
 
 
 GuiModel.prototype.selectEntry = function (e) {
     /* Activate the right-hand side */
 
-    var item = gm.tree.view.getItemAtIndex(gm.tree.currentIndex);
-    var entrynode = item.getElementsByClassName("entryid")[0];
-    var entryid = entrynode.getAttribute("label");
-    gm.curr_entryid = entryid;
-    gm.curr_tree_selection = gm.tree.view.selection.currentIndex;
+    e.preventDefault();
+    var entrynode = e.target;
+    var entryid = entrynode.getAttribute("href");
 
     // Change the contents of the viewer
     gm.atom_doc.documentElement.setAttribute("selected", entryid);
     var result = gm.viewerprocessor.transformToDocument(gm.atom_doc);
     var iresult = document.importNode(result.documentElement, true);
     Sarissa.moveChildNodes(iresult, gm.viewer); 
+
 }
 
 
 function initGuiModel () {
-    /* Run on document load by the DOMContentLoaded listener below */
+    /* Run on document load by the onload handler */
 
     if (window.location.host.indexOf(":") == -1){
 	// Running from FS, not dynamicall via WSGI, use dummy data
@@ -107,11 +90,10 @@ function initGuiModel () {
     } else {
 	var atom_url = "../feed.xml";
     }
-    gm = new GuiModel("xui-logtree", atom_url);
-    gm.loadProcessor("debugui-xul.xsl");
+    gm = new GuiModel("logtree", atom_url);
+    gm.loadProcessor("debugui-html.xsl");
     gm.loadViewerProcessor("debugui-entryviewer.xsl");
+    gm.atom_doc = gm.loadURL(atom_url);
     gm.reloadModel();
+    console.log("init ran, model loaded");
 }
-
-document.addEventListener("DOMContentLoaded", initGuiModel, false);
-

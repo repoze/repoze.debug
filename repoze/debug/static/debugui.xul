@@ -6,6 +6,7 @@
     xmlns:html="http://www.w3.org/1999/xhtml" xmlns:rz="http://repoze.org/namespaces"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     <script src="sarissa.js"/>
+    <script src="debugui-shared.js"/>
     <script src="debugui-xul.js"/>
     <vbox flex="1">
         <tree id="xui-logtree" datasources="samplelogentries.xml" ref="*" querytype="xml"

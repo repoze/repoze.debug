@@ -1,20 +1,42 @@
 body {
     font-family: sans-serif;
-    font-size: 0.85em;
+    font-size: 0.9em;
 }
 #lhc {
     position: absolute;
     top: 0;
     left: 0;
-    width: 200px;
+    width: 230px;
     height: 100%;
     background-color: silver;
     color: black;
     border-right: solid black 0px;
 }
-#tree {
+#logtree {
     margin: 0.4em;
+    height: 90%;
+    padding: 0.2em
 }
 #selected-entry {
-    margin-left: 230px;
+    margin-left: 260px;
+}
+.tree-entry, .tree-item-entry {
+    margin-bottom: 0.6em;
+}
+.tree-item {
+    margin-left: 0.8em;
+}
+.tree-entry > div > a {
+    font-weight:bold;
+}
+.tree-entry a, .tree-item a {
+    text-decoration: none;
+    color: black;
+    background-color:silver;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+.tree-entry a:hover, .tree-item a:hover {
+    color:black;
+    border:dashed gray 1px;
 }

@@ -350,6 +350,26 @@ Examples::
     Read from 'requests.stat' stats file (instead of actual -M log files)
     and show detailed report against this data.
 
+Sample wsgirequestprofiler output
+---------------------------------
+
+Sample output from ``wsgirequestprofiler trace.log``::
+
+  Hangs  Hits    Total   Max   Min   Med  Mean URL
+      0   848    88.58  2.14  0.02  0.10  0.10 http://127.0.0.1:9971/ehs
+      0   737    73.24  1.45  0.02  0.10  0.10 http://127.0.0.1:9971/ehs/login_f
+      0     2    13.83 12.41  1.42  6.92  6.92 http://localhost:9971/ehs/archive
+      0     1     0.55  0.55  0.55  0.55  0.55 http://localhost:9971/ehs/archive
+      0     1     0.49  0.49  0.49  0.49  0.49 http://localhost:9971/ehs/archive
+      0     1     0.29  0.29  0.29  0.29  0.29 http://localhost:9971/ehs
+      0     1     0.19  0.19  0.19  0.19  0.19 http://localhost:9971/ehs/archive
+      0     1     0.13  0.13  0.13  0.13  0.13 http://localhost:9971/ehs/archive
+      0     1     0.06  0.06  0.06  0.06  0.06 http://localhost:9971/ehs/archive
+      0     1     0.06  0.06  0.06  0.06  0.06 http://localhost:9971/ehs/archive
+      0     1     0.02  0.02  0.02  0.02  0.02 http://localhost:9971/empty.css
+      0     1     0.01  0.01  0.01  0.01  0.01 http://localhost:9971/ehs/archive
+      0     1     0.01  0.01  0.01  0.01  0.01 http://localhost:9971/ehs/ehn_alt
+
 canary middleware
 =================
 

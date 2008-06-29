@@ -13,8 +13,15 @@ Install using setuptools, e.g. (within a virtualenv)::
 responselogger middleware
 =========================
 
-The responselogger middleware logs requests and responses to a file
-for later perusal.
+The responselogger middleware logs requests and responses to a set of
+files for later perusal and analysis.
+
+There are two logs: the verbose log, and the trace log.
+
+The verbose log is human-readable.
+
+The trace log is meant to be processed by the wsgirequestprofiler
+script (included).
 
 Configuration via Python
 ------------------------
@@ -25,8 +32,10 @@ Wire up the middleware in your application::
  from logging import getLogger
  middleware = ResponseLoggingMiddleware(
                 app,
-                max_bodylen='3KB',
-                logger=getLogger('foo')
+                max_bodylen=3072,
+                keep=100,
+                verbose_logger=getLogger('foo'),
+                trace_logger = getLogger('bar'),
                )
 
 The configuration options are as follows::
@@ -44,7 +53,8 @@ example::
 
  [filter:responselogger]
  use = egg:repoze.debug#responselogger
- filename = %(here)s/response.log
+ verbose_log = %(here)s/response.log
+ trace_log = %(here)s/trace.log
  # if max_bodylen is unset or is 0, it means do not limit body logging
  # default is 0
  max_bodylen = 3KB
@@ -67,8 +77,8 @@ Operation
 ---------
 
 Once the middleware is in the pipeline, it will log requests and
-responses to the logger.  An example of the log output for a request
-follows::
+responses to the logger.  An example of the verbose log output for a
+request follows::
 
   --- REQUEST 860724193 at Fri Jun 13 18:40:47 2008 ---
   URL: http://localhost:9971/p_/pl
@@ -98,7 +108,7 @@ follows::
   --- end REQUEST 860724193 ---
 
 Each request is tagged with a (random) identifier.  A response is also
-written to the log, and can be matched up to the request that
+written to the verbose log, and can be matched up to the request that
 generated it via the identifier.  Here's an example of a response in
 the log::
 
@@ -114,6 +124,16 @@ the log::
 
   1?9p?:'~?? ?0a???q?J?(I?|;@@???????@?????!?,H? ?H?`?2t???K.LH?`D?
   --- end RESPONSE 860724193 ---
+
+The trace logger output looks like::
+
+  B 1214703612.55 2008-06-28T21:40:12 GET http://127.0.0.1:9971/ehs
+  A 1214703612.55 2008-06-28T21:40:13 200 1951
+  E 1214703612.55 2008-06-28T21:40:13 1951
+
+This information is meant to be parsed with the included
+wsgirequestprofiler script to help in debugging hangs or requests that
+take "too long".  Run it with the --help flag for more information.
 
 canary middleware
 =================

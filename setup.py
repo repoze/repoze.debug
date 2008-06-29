@@ -61,6 +61,8 @@ setup(name='repoze.debug',
         responselogger = repoze.debug.responselogger:make_middleware
         canary = repoze.debug.canary:make_middleware
         pdbpm = repoze.debug.pdbpm:make_middleware
+        [console_scripts]
+        wsgirequestprofiler = repoze.debug.scripts.requestprofiler:main
       """
       )
 

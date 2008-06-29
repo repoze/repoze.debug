@@ -8,10 +8,11 @@ from repoze.debug.ui import is_gui_url
 from repoze.debug.ui import DebugGui
 
 class ResponseLoggingMiddleware:
-    def __init__(self, app, max_bodylen, logger, keep):
+    def __init__(self, app, max_bodylen, keep, verbose_logger, trace_logger):
         self.application = app
         self.max_bodylen = max_bodylen
-        self.logger = logger
+        self.verbose_logger = verbose_logger
+        self.trace_logger = trace_logger
         self.keep = keep
         self.entries = []
         self.lock = threading.Lock()
@@ -24,7 +25,6 @@ class ResponseLoggingMiddleware:
             return gui(environ, start_response)
 
         request_id = get_request_id(now)
-
         request_info = self.get_request_info(environ)
         request_info['begin'] = now
         self.log_request_begin(request_id, request_info)
@@ -89,9 +89,11 @@ class ResponseLoggingMiddleware:
 
     def log_request_begin(self, request_id, info):
         out = []
-        t = time.ctime(info['begin'])
+        begin = info['begin']
+        t = time.ctime(begin)
         out.append('--- begin REQUEST for %s at %s ---' % (request_id, t))
-        out.append('URL: %s %s' % (info['method'], info['url']))
+        method_and_url = '%s %s' % (info['method'], info['url'])
+        out.append('URL: %s' % method_and_url)
         out.append('CGI Variables')
         for k, v in info['cgi_variables']:
             out.append('  %s: %s' % (k, v))
@@ -99,7 +101,10 @@ class ResponseLoggingMiddleware:
         for k, v in info['wsgi_variables']:
             out.append('  %s: %s' % (k, v))
         out.append('--- end REQUEST for %s ---' % request_id)
-        self.logger.info('\n'.join(out))
+        self.verbose_logger and self.verbose_logger.info('\n'.join(out))
+        trace_t = time.strftime('%Y-%m-%dT%H:%M:%S', time.localtime(begin))
+        info = 'B %s %s %s' % (request_id, trace_t, method_and_url)
+        self.trace_logger and self.trace_logger.info(info)
 
     def get_response_info(self, status, headers):
         info = {}
@@ -115,7 +120,13 @@ class ResponseLoggingMiddleware:
     
     def log_response(self, request_id, request_info, response_info, body):
         out = []
-        t = time.ctime(response_info['begin'])
+        begin = response_info['begin']
+        t = time.ctime(begin)
+        trace_t = time.strftime('%Y-%m-%dT%H:%M:%S', time.localtime(begin))
+        status = response_info['status'].split(' ', 1)[0]
+        cl = response_info['content-length']
+        info = 'A %s %s %s %s' % (request_id, trace_t, status, cl)
+        self.trace_logger and self.trace_logger.info(info)
         out.append('--- begin RESPONSE for %s at %s ---' % (request_id, t))
         out.append('URL: %s %s' % (request_info['method'], request_info['url']))
         out.append('Status: %s' % response_info['status'])
@@ -135,18 +146,20 @@ class ResponseLoggingMiddleware:
             bodyout += ' ... (truncated at %s bytes)' % self.max_bodylen
         out.append('Body:\n' + bodyout)
         out.append('Bodylen: %s' % bodylen)
-        cl = response_info['content-length']
         if cl is not None:
             if bodylen != cl:
                 out.append(
                     'WARNING-1: bodylen (%s) != Content-Length '
                     'header value (%s)' % (bodylen, cl))
         response_info['body'] = bodyout
-        response_info['end'] = time.time()
+        end = response_info['end'] = time.time()
         duration = response_info['end'] - request_info['begin']
         out.append('--- end RESPONSE for %s (%0.2f seconds) ---' % (
             request_id, duration))
-        self.logger.info('\n'.join(out))
+        self.verbose_logger.info('\n'.join(out))
+        trace_t = time.strftime('%Y-%m-%dT%H:%M:%S', time.localtime(end))
+        info = 'E %s %s %s' % (request_id, trace_t, bodylen)
+        self.trace_logger and self.trace_logger.info(info)
         
 class SuffixMultiplier:
     # d is a dictionary of suffixes to integer multipliers.  If no suffixes
@@ -205,7 +218,8 @@ def get_request_id(when, period=.10, max=10000, lock=threading.Lock()):
 
 def make_middleware(app,
                     global_conf,
-                    filename,
+                    verbose_log=None,
+                    trace_log=None,
                     max_bodylen='3KB',
                     max_logsize='100MB',
                     backup_count='10',
@@ -216,12 +230,20 @@ def make_middleware(app,
     max_bytes = byte_size(max_logsize)
     max_bodylen = byte_size(max_bodylen)
     keep = int(keep)
-
     from logging import Logger
     from logging.handlers import RotatingFileHandler
 
-    handler = RotatingFileHandler(filename, maxBytes=max_logsize,
-                                  backupCount=backup_count)
-    logger = Logger('repoze.debug.responselogger')
-    logger.handlers = [handler]
-    return ResponseLoggingMiddleware(app, max_bodylen, logger, keep)
+    if verbose_log:
+        handler = RotatingFileHandler(verbose_log, maxBytes=max_logsize,
+                                        backupCount=backup_count)
+        verbose_log = Logger('repoze.debug.verboselogger')
+        verbose_log.handlers = [handler]
+
+    if trace_log:
+        handler = RotatingFileHandler(trace_log, maxBytes=max_logsize,
+                                        backupCount=backup_count)
+        trace_log = Logger('repoze.debug.tracelogger')
+        trace_log.handlers = [handler]
+    
+    return ResponseLoggingMiddleware(app, max_bodylen, keep, verbose_log,
+                                     trace_log)

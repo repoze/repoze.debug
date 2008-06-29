@@ -1,0 +1,13 @@
+ [ ] Awaiting request
+
+ [X] Received request
+
+ [X] Forwarded request
+
+ [ ] Awaiting response
+
+ [X] Received response
+
+ [X] Returning response
+
+ [X] Returned response

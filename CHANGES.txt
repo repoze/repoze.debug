@@ -11,6 +11,16 @@ Next release
 
   - User interface; keep entries around to show in GUI.
 
+  - We now write two logs: a verbose log, and a trace log.  The
+    verbose log contains information about headers, request
+    information, response bodies, etc.  The trace log is more compact
+    and is written in essence to be parsed by a tool.
+
+    The 'filename' option in Paste config is now 'verbose_log'.
+
+  - Port Zope's 'requestprofiler' script to WSGI.  Invoke via
+    'wsgirequestprofiler' to see help; operates against 'trace' log.
+
 0.4 (2008/06/25)
 
   - Add pdbpm middleware for dropping into the post-mortem debugger

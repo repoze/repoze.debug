@@ -24,13 +24,14 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
     def test_call(self):
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
-        logger = FakeLogger()
-        mw = self._makeOne(app, 0, logger, 10)
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 0, 10, vlogger, tlogger)
         environ = self._makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(list(app_iter)), 'thebody')
-        self.assertEqual(len(logger.logged), 2)
+        self.assertEqual(len(vlogger.logged), 2)
         self.assertEqual(start_response.status, '200 OK')
         self.assertEqual(len(start_response.headers), 1)
         self.assertEqual(start_response.headers[0], ('HeaderKey','headervalue'))
@@ -40,46 +41,50 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
     def test_call_overmaxbodylen(self):
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
-        logger = FakeLogger()
-        mw = self._makeOne(app, 1, logger, 10)
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 1, 10, vlogger, tlogger)
         environ = self._makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
-        self.assertEqual(len(logger.logged), 2)
-        self.failUnless('(truncated at 1 bytes)' in logger.logged[1])
+        self.assertEqual(len(vlogger.logged), 2)
+        self.failUnless('(truncated at 1 bytes)' in vlogger.logged[1])
 
     def test_call_contentlengthwrong(self):
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('Content-Length', '1')])
-        logger = FakeLogger()
-        mw = self._makeOne(app, 1, logger, 10)
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 1, 10, vlogger, tlogger)
         environ = self._makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
-        self.assertEqual(len(logger.logged), 2)
-        self.failUnless('WARNING-1' in logger.logged[1])
+        self.assertEqual(len(vlogger.logged), 2)
+        self.failUnless('WARNING-1' in vlogger.logged[1])
 
     def test_call_sourceurl_in_response(self):
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('Content-Length', '1')])
-        logger = FakeLogger()
-        mw = self._makeOne(app, 1, logger, 10)
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 1, 10, vlogger, tlogger)
         environ = self._makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
-        self.assertEqual(len(logger.logged), 2)
-        self.failUnless('URL: GET http://localhost' in logger.logged[1])
+        self.assertEqual(len(vlogger.logged), 2)
+        self.failUnless('URL: GET http://localhost' in vlogger.logged[1])
 
     def test_entry_created(self):
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('Content-Length', '1')])
-        logger = FakeLogger()
-        mw = self._makeOne(app, 1, logger, 10)
-        environ = self._makeEnviron()
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 1, 10, vlogger, tlogger)
         start_response = FakeStartResponse()
+        environ = self._makeEnviron()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(mw.entries), 1)
@@ -96,6 +101,53 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(len(entry['request']['wsgi_variables']), 2)
         self.failUnless(isinstance(entry['id'], float))
 
+    def test_trace_logging(self):
+        import time
+        body = ['thebody']
+        app = DummyApp(body, '200 OK', [('Content-Length', '7')])
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 1, 10, vlogger, tlogger)
+        start_response = FakeStartResponse()
+        environ = self._makeEnviron()
+        app_iter = mw(environ, start_response)
+        self.assertEqual(''.join(app_iter), 'thebody')
+        self.assertEqual(len(tlogger.logged), 3)
+        logged = tlogger.logged
+        
+        result = logged[0].split(' ', 3)
+        entry = mw.entries[0]
+        begin = entry['request']['begin']
+        rid = entry['id']
+        self.assertEqual(result[0], 'B')
+        self.assertEqual(result[1], str(rid))
+        self.assertEqual(result[2],
+                         time.strftime('%Y-%m-%dT%H:%M:%S',
+                                       time.localtime(begin)))
+        self.assertEqual(result[3], 'GET http://localhost')
+                         
+        result = logged[1].split(' ', 3)
+        entry = mw.entries[0]
+        begin = entry['request']['begin']
+        rid = entry['id']
+        self.assertEqual(result[0], 'A')
+        self.assertEqual(result[1], str(rid))
+        self.assertEqual(result[2],
+                         time.strftime('%Y-%m-%dT%H:%M:%S',
+                                       time.localtime(begin)))
+        self.assertEqual(result[3], '200 7')
+
+        result = logged[2].split(' ', 3)
+        entry = mw.entries[0]
+        begin = entry['request']['begin']
+        rid = entry['id']
+        self.assertEqual(result[0], 'E')
+        self.assertEqual(result[1], str(rid))
+        self.assertEqual(result[2],
+                         time.strftime('%Y-%m-%dT%H:%M:%S',
+                                       time.localtime(begin)))
+        self.assertEqual(result[3], '7')
+
 class TestMakeResponseLoggingMiddleware(unittest.TestCase):
     def _getFUT(self):
         from repoze.debug.responselogger import make_middleware
@@ -107,8 +159,8 @@ class TestMakeResponseLoggingMiddleware(unittest.TestCase):
         global_conf = {}
         import tempfile
         fn = tempfile.mktemp()
-        mw = f(app, global_conf, fn)
-        self.assertEqual(len(mw.logger.handlers), 1)
+        mw = f(app, global_conf)
+        self.assertEqual(mw.verbose_logger, None)
         self.assertEqual(mw.max_bodylen, 3072)
         self.assertEqual(mw.keep, 100)
 
@@ -117,9 +169,11 @@ class TestMakeResponseLoggingMiddleware(unittest.TestCase):
         app = DummyApp(None, None, None)
         global_conf = {}
         import tempfile
-        fn = tempfile.mktemp()
-        mw = f(app, global_conf, fn, '0', '0', '0', '0')
-        self.assertEqual(len(mw.logger.handlers), 1)
+        vfn = tempfile.mktemp()
+        tfn = tempfile.mktemp()
+        mw = f(app, global_conf, vfn, tfn, '0', '0', '0', '0')
+        self.assertEqual(len(mw.verbose_logger.handlers), 1)
+        self.assertEqual(len(mw.trace_logger.handlers), 1)
         self.assertEqual(mw.max_bodylen, 0)
         self.assertEqual(mw.keep, 0)
 

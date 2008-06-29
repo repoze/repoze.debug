@@ -110,43 +110,41 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         mw = self._makeOne(app, 1, 10, vlogger, tlogger)
         start_response = FakeStartResponse()
         environ = self._makeEnviron()
+        mw.pid = 0
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
-        self.assertEqual(len(tlogger.logged), 3)
+        self.assertEqual(len(tlogger.logged), 4)
         logged = tlogger.logged
+        entry = mw.entries[0]
+        rid = entry['id']
+        begin = entry['request']['begin']
         
-        result = logged[0].split(' ', 3)
-        entry = mw.entries[0]
-        begin = entry['request']['begin']
-        rid = entry['id']
-        self.assertEqual(result[0], 'B')
-        self.assertEqual(result[1], str(rid))
-        self.assertEqual(result[2],
-                         time.strftime('%Y-%m-%dT%H:%M:%S',
-                                       time.localtime(begin)))
-        self.assertEqual(result[3], 'GET http://localhost')
-                         
-        result = logged[1].split(' ', 3)
-        entry = mw.entries[0]
-        begin = entry['request']['begin']
-        rid = entry['id']
-        self.assertEqual(result[0], 'A')
-        self.assertEqual(result[1], str(rid))
-        self.assertEqual(result[2],
-                         time.strftime('%Y-%m-%dT%H:%M:%S',
-                                       time.localtime(begin)))
-        self.assertEqual(result[3], '200 7')
+        result = logged[0].split(' ', 4)
+        self.assertEqual(result[0], 'U')
+        self.assertEqual(result[1], str(mw.pid))
+        self.assertEqual(result[2], str(rid))
+        self.assertEqual(result[3], str(begin))
 
-        result = logged[2].split(' ', 3)
-        entry = mw.entries[0]
-        begin = entry['request']['begin']
-        rid = entry['id']
+        result = logged[1].split(' ', 4)
+        self.assertEqual(result[0], 'B')
+        self.assertEqual(result[1], str(mw.pid))
+        self.assertEqual(result[2], str(rid))
+        self.assertEqual(result[3], str(begin))
+        self.assertEqual(result[4], 'GET http://localhost')
+                         
+        result = logged[2].split(' ', 4)
+        self.assertEqual(result[0], 'A')
+        self.assertEqual(result[1], str(mw.pid))
+        self.assertEqual(result[2], str(rid))
+        self.assertEqual(result[3], str(begin))
+        self.assertEqual(result[4], '200 7')
+
+        result = logged[3].split(' ', 4)
         self.assertEqual(result[0], 'E')
-        self.assertEqual(result[1], str(rid))
-        self.assertEqual(result[2],
-                         time.strftime('%Y-%m-%dT%H:%M:%S',
-                                       time.localtime(begin)))
-        self.assertEqual(result[3], '7')
+        self.assertEqual(result[1], str(mw.pid))
+        self.assertEqual(result[2], str(rid))
+        self.assertEqual(result[3], str(begin))
+        self.assertEqual(result[4], '7')
 
 class TestMakeResponseLoggingMiddleware(unittest.TestCase):
     def _getFUT(self):

@@ -1,4 +1,5 @@
 import itertools
+import os
 import time
 import threading
 
@@ -16,6 +17,11 @@ class ResponseLoggingMiddleware:
         self.keep = keep
         self.entries = []
         self.lock = threading.Lock()
+        self.first_request = True
+        if hasattr(os, 'getpid'):
+            self.pid = os.getpid()
+        else:
+            self.pid = 0
 
     def __call__(self, environ, start_response):
         now = time.time()
@@ -102,8 +108,15 @@ class ResponseLoggingMiddleware:
             out.append('  %s: %s' % (k, v))
         out.append('--- end REQUEST for %s ---' % request_id)
         self.verbose_logger and self.verbose_logger.info('\n'.join(out))
-        trace_t = time.strftime('%Y-%m-%dT%H:%M:%S', time.localtime(begin))
-        info = 'B %s %s %s' % (request_id, trace_t, method_and_url)
+        self.lock.acquire()
+        try:
+            if self.first_request:
+                info = 'U %s %s %s' % (self.pid, request_id, begin)
+                self.trace_logger and self.trace_logger.info(info)
+                self.first_request = False
+        finally:
+            self.lock.release()
+        info = 'B %s %s %s %s' % (self.pid, request_id, begin, method_and_url)
         self.trace_logger and self.trace_logger.info(info)
 
     def get_response_info(self, status, headers):
@@ -122,10 +135,9 @@ class ResponseLoggingMiddleware:
         out = []
         begin = response_info['begin']
         t = time.ctime(begin)
-        trace_t = time.strftime('%Y-%m-%dT%H:%M:%S', time.localtime(begin))
         status = response_info['status'].split(' ', 1)[0]
         cl = response_info['content-length']
-        info = 'A %s %s %s %s' % (request_id, trace_t, status, cl)
+        info = 'A %s %s %s %s %s' % (self.pid, request_id, begin, status, cl)
         self.trace_logger and self.trace_logger.info(info)
         out.append('--- begin RESPONSE for %s at %s ---' % (request_id, t))
         out.append('URL: %s %s' % (request_info['method'], request_info['url']))
@@ -157,8 +169,7 @@ class ResponseLoggingMiddleware:
         out.append('--- end RESPONSE for %s (%0.2f seconds) ---' % (
             request_id, duration))
         self.verbose_logger.info('\n'.join(out))
-        trace_t = time.strftime('%Y-%m-%dT%H:%M:%S', time.localtime(end))
-        info = 'E %s %s %s' % (request_id, trace_t, bodylen)
+        info = 'E %s %s %s %s' % (self.pid, request_id, end, bodylen)
         self.trace_logger and self.trace_logger.info(info)
         
 class SuffixMultiplier:

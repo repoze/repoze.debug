@@ -40,10 +40,15 @@ Wire up the middleware in your application::
 
 The configuration options are as follows::
 
- - ``max_bodylen`` should be the size in bytes (optionally followed by
-   KB, MB, or GB) of the response body that should be logged.
+ - ``max_bodylen`` should be the max size in bytes of the response
+   body that should be logged.
 
- - ``logger`` is a PEP 282 logger instance (any).
+ - ``keep`` is the number of request entries to keep around in memory
+   to service the GUI.
+
+ - ``verbose_logger`` is a PEP 282 logger instance (any).
+
+ - ``trace_logger`` is a PEP 282 logger instance (any).
 
 Configuration via Paste
 -----------------------
@@ -73,12 +78,12 @@ example::
 
 The middleware will log response data to ``filename``.
 
-Operation
----------
+Verbose logger
+--------------
 
-Once the middleware is in the pipeline, it will log requests and
-responses to the logger.  An example of the verbose log output for a
-request follows::
+Once the middleware is in the pipeline, it will log human-readable
+information about requests and responses to the verbose logger.  An
+example of the verbose log output for a request follows::
 
   --- REQUEST 860724193 at Fri Jun 13 18:40:47 2008 ---
   URL: http://localhost:9971/p_/pl
@@ -125,15 +130,225 @@ the log::
   1?9p?:'~?? ?0a???q?J?(I?|;@@???????@?????!?,H? ?H?`?2t???K.LH?`D?
   --- end RESPONSE 860724193 ---
 
-The trace logger output looks like::
+Trace logger
+------------
 
-  B 1214703612.55 2008-06-28T21:40:12 GET http://127.0.0.1:9971/ehs
-  A 1214703612.55 2008-06-28T21:40:13 200 1951
-  E 1214703612.55 2008-06-28T21:40:13 1951
+The trace logger logs detailed debugging information about WSGI
+requests and responses.  This logging can be turned on while the
+server is in production.  It can then be postprocessed to help locate
+troublesome application code.
+
+The format of a log message is::
+
+    {code} {pid} {request id} {time} {data}
+
+Where::
+
+    {code} is B for begin, A for received output from the application,
+    E for finished sending output to the client.  A special code
+    exists, U, that is not really tied to any particular request.  It
+    is written to the log upon the first request after the server
+    is started.
+
+    {request id} is a unique request id.
+
+    {time} is the local time as seconds past the epoch.
+
+    {data} is the HTTP method and the URL for B, the HTTP status code
+    and the value of the content-length header for A, the actual
+    content length for E, and nothing for U.
+
+For example::
+
+  U 78793 1214751832.51 1214751832.51
+  B 78793 1214751832.51 1214751832.51 GET http://127.0.0.1:9971/ehs
+  B 78793 1214751832.51 1214751832.51 GET http://127.0.0.1:9971/ehs
+  B 78793 1214751832.51 1214751832.51 GET http://127.0.0.1:9971/ehs
+  B 78793 1214751832.51 1214751832.51 GET http://127.0.0.1:9971/ehs
+  A 78793 1214751832.51 1214751834.65 200 1951
+  E 78793 1214751832.51 1214751834.65 1951
+  B 78793 1214751834.68 1214751834.68 GET http://127.0.0.1:9971/ehs
+  A 78793 1214751832.51 1214751834.69 200 1951
+  E 78793 1214751832.51 1214751834.7 1951
+  A 78793 1214751832.51 1214751834.71 200 1951
+  A 78793 1214751832.51 1214751834.72 200 1951
+  E 78793 1214751832.51 1214751834.71 1951
 
 This information is meant to be parsed with the included
-wsgirequestprofiler script to help in debugging hangs or requests that
-take "too long".  Run it with the --help flag for more information.
+``wsgirequestprofiler`` console script to help in debugging hangs or
+requests that take "too long".  Run the ``wsgirequestprofiler`` script
+with the --help flag for more information.
+
+wsgirequestprofiler script
+--------------------------
+
+Usage::
+   bin/wsgirequestprofiler filename1 [filename2 ...]
+          [--cumulative | --detailed | [--timed --resolution=seconds]]
+          [--sort=spec]
+          [--top=n]
+          [--verbose]
+          [--today | [--start=date] [--end=date] | --daysago=n ]
+          [--writestats=filename | --readstats=filename]
+          [--urlfocus=url]
+          [--urlfocustime=seconds]
+          [--help]
+
+Provides a profile of one or more repoze.debug "trace" log files.
+Note that this script is a port of the Zope2 ``requestprofiler``
+script (written originally in 2001!)
+
+Reports are of four types: cumulative, detailed, timed, or urlfocus.
+The default is cumulative. Data is taken from one or more repoze.debug
+trace logs or from a preprocessed statistics file.
+
+For cumulative reports, each line in the profile indicates information
+about a URL collected via a detailed request log.
+
+For detailed reports, each line in the profile indicates information about
+a single request.
+
+For timed reports, each line in the profile indicates informations about
+the number of requests and the number of requests/second for a period of time.
+
+For urlfocus reports, ad-hoc information about requests surrounding the
+specified url is given.
+
+Each ``filename`` is a path to a trace log that contains detailed
+request data.  Multiple input files can be analyzed at the same time
+by providing the path to each file.  (Analyzing multiple trace log
+files at once is useful if you have more than one machine running your
+application and you'd like to get an overview of all logs on those
+machines).
+
+If you wish to make multiple analysis runs against the same input
+data, you may want to use the --writestats option.  The --writestats
+option creates a file which holds preprocessed data representing the
+specfified input files.  Subsequent runs (for example with a different
+sort spec) will be much faster if the --readstats option is used to
+specify a preprocessed stats file instead of actual input files
+because the logfile parse step is skipped.
+
+If a ``sort`` value is specified, sort the profile info by the spec.
+The sort order is descending unless indicated.  The default cumulative
+sort spec is ``total``.  The default detailed sort spec is ``start``.
+
+For cumulative reports, the following sort specs are accepted::
+
+  'hits'        -- the number of hits against the method
+  'hangs'       -- the number of unfinished requests to the method
+  'max'         -- the maximum time in secs taken by a request to this method
+  'min'         -- the minimum time in secs taken by a request to this method
+  'mean'        -- the mean time in secs taken by a request to this method
+  'median'      -- the median time in secs taken by a request to this method
+  'total'       -- the total time in secs across all requests to this method
+  'url'         -- the URL/method name (ascending)
+
+For detailed (non-cumulative) reports, the following sort specs are
+accepted::
+
+  'start'       -- the start time of the request to repoze.debug (ascending)
+  'win'         -- the num of secs repoze.debug spent waiting for input
+  'wout'        -- the secs repoze.debug spent waiting for output from app
+  'wend'        -- the secs repoze.debug spent sending data to server
+  'total'       -- the secs taken for the request from begin to end
+  'endstage'    -- the last successfully completed request stage (B, I, A, E)
+  'osize'       -- the size in bytes of output provided by repoze.debug
+  'httpcode'    -- the HTTP response code provided by the app (ascending)
+  'active'      -- total num of requests pending at the end of this request
+  'url'         -- the URL  (ascending)
+
+For timed and urlfocus reports, there are no sort specs allowed.
+
+If the ``top`` argument is specified, only report on the top 'n' entries
+in the profile (as per the sort). The default is to show all data in
+the profile.
+
+If the ``verbose`` argument is specified, do not trim url to fit into 80
+cols.
+
+If the ``today`` argument is specified, limit results to hits received
+today.
+
+If the ``daysago`` argument is specified, limit results to hits received
+n days ago.
+
+The ``resolution`` argument is used only for timed reports and specifies
+the number of seconds between consecutive lines in the report (default
+is 60 seconds).
+
+The ``urlfocustime`` argument is used only for urlfocus reports and
+specifies the number of seconds to target before and after the URL
+provided in urlfocus mode.  (default is 10 seconds).
+
+If the ``start`` argument is specified in the form 'DD/MM/YYYY HH:MM:SS'
+(local time), limit results to hits received after this date/time.
+
+If the ``end`` argument is specified in the form 'DD/MM/YYYY HH:MM:SS'
+(local time), limit results to hits received before this date/time.
+
+``start`` and ``end`` arguments are not honored when request stats are
+obtained via the ``--readstats`` argument.
+
+Examples::
+
+  bin/wsgirequestprofiler debug.log
+
+    Show cumulative report statistics for information in the file 'debug.log',
+    by default sorted by 'total'.
+
+  bin/wsgirequestprofiler debug.log --detailed
+
+    Show detailed report statistics sorted by 'start' (by default).
+
+  bin/wsgirequestprofiler debug.log debug2.log --detailed
+
+    Show detailed report statistics for both logs sorted by 'start'
+    (by default).
+
+  bin/wsgirequestprofiler debug.log --cumulative --sort=mean --today --verbose
+
+    Show cumulative report statistics sorted by mean for entries in the log
+    which happened today, and do not trim the URL in the resulting report.
+
+  bin/wsgirequestprofiler debug.log --cumulative --sort=mean --daysago=3 --verbose
+
+    Show cumulative report statistics sorted by mean for entries in the log
+    which happened three days ago, and do not trim the URL in the resulting report.
+
+  bin/wsgirequestprofiler debug.log --urlfocus='/manage_main' --urlfocustime=60
+
+    Show 'urlfocus' report which displays statistics about requests
+    surrounding the invocation of '/manage_main'.  Focus on the time periods
+    60 seconds before and after each invocation of the '/manage_main' URL.
+
+  bin/wsgirequestprofiler debug.log --detailed --start='2001/05/10 06:00:00'
+    --end='2001/05/11 23:00:00'
+
+    Show detailed report statistics for entries in 'debug.log' which
+    begin after 6am local time on May 10, 2001 and which end before
+    11pm local time on May 11, 2001.
+
+  bin/wsgirequestprofiler debug.log --timed --resolution=300 --start='2001/05/10 06:00:00'
+    --end='2001/05/11 23:00:00'
+
+    Show timed report statistics for entries in the log for one day
+    with a resolution of 5 minutes
+
+  bin/wsgirequestprofiler debug.log --top=100 --sort=max
+
+    Show cumulative report of the the 'top' 100 methods sorted by maximum
+    elapsed time.
+
+  bin/wsgirequestprofiler debug.log debug2.log --writestats='requests.stat'
+
+    Write stats file for debug.log and debug2.log into 'requests.stat' and
+    show default report.
+
+  bin/wsgirequestprofiler --readstats='requests.stat' --detailed
+
+    Read from 'requests.stat' stats file (instead of actual -M log files)
+    and show detailed report against this data.
 
 canary middleware
 =================

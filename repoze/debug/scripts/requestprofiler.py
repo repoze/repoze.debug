@@ -10,16 +10,20 @@
 # FOR A PARTICULAR PURPOSE
 #
 ##############################################################################
-"""Request log profiler script
+"""Trace log profiler script
 
 $Id: requestprofiler.py 40218 2005-11-18 14:39:19Z andreasjung $
 """
-import sys, time, getopt, math, cPickle
+import cPickle
+import getopt
+try:
+    import gzip
+except:
+    gzip = None
+import math
+import sys
+import time
 from types import StringType
-try: import gzip
-except: pass
-
-verbose = False
 
 class ProfileException(Exception):
     pass
@@ -35,7 +39,7 @@ class Request:
         self.osize = None
         self.httpcode = None
         self.t_end = None
-        self.elapsed = "I"
+        self.elapsed = None
         self.active = 0
 
     def put(self, code, t, desc):
@@ -50,10 +54,10 @@ class Request:
             self.httpcode, self.osize = desc.strip().split()
         elif code == 'E':
             self.t_end = t
-            self.elapsed = int(self.t_end - self.start)
+            self.elapsed = self.t_end - self.start
 
     def isfinished(self):
-        return not self.elapsed == "I"
+        return not self.elapsed is None
 
     def prettystart(self):
         if self.start is not None:
@@ -67,25 +71,25 @@ class Request:
             t = time.localtime(self.start)
             return time.strftime('%H:%M:%S', t)
         else:
-            return "NA"
+            return -1
 
     def win(self):
         if self.t_recdinput is not None and self.start is not None:
             return self.t_recdinput - self.start
         else:
-            return "NA"
+            return -1
 
     def wout(self):
         if self.t_recdoutput is not None and self.t_recdinput is not None:
             return self.t_recdoutput - self.t_recdinput
         else:
-            return "NA"
+            return -1
 
     def wend(self):
         if self.t_end is not None and self.t_recdoutput is not None:
             return self.t_end - self.t_recdoutput
         else:
-            return "NA"
+            return -1
 
     def endstage(self):
         if self.t_end is not None:
@@ -100,22 +104,26 @@ class Request:
 
     def total(self):
         stage = self.endstage()
-        if stage == "B": return 0
-        if stage == "I": return self.t_recdinput - self.start
-        if stage == "A": return self.t_recdoutput - self.start
-        if stage == "E": return self.elapsed
+        if stage == "B":
+            return 0
+        if stage == "I":
+            return self.t_recdinput - self.start
+        if stage == "A":
+            return self.t_recdoutput - self.start
+        if stage == "E":
+            return self.elapsed
 
     def prettyisize(self):
         if self.isize is not None:
             return self.isize
         else:
-            return "NA"
+            return -1
 
     def prettyosize(self):
         if self.osize is not None:
             return self.osize
         else:
-            return "NA"
+            return -1
 
     def prettyhttpcode(self):
         if self.httpcode is not None:
@@ -124,19 +132,19 @@ class Request:
             return "NA"
 
     def __str__(self):
+        fmt = "%19s %5.2f %5.2f %5.2f %5.2f %1s %7s %4s %4s %s"
         body = (
             self.prettystart(), self.win(), self.wout(), self.wend(),
             self.total(), self.endstage(), self.prettyosize(),
             self.prettyhttpcode(), self.active, self.url
             )
-        return self.fmt % body
-
-    fmt = "%19s %4s %4s %4s %3s %1s %7s %4s %4s %s"
+        return fmt % body
 
     def getheader(self):
+        fmt = "%19s %5s %5s %5s %5s %1s %7s %4s %4s %s"
         body = ('Start', 'WIn', 'WOut', 'WEnd', 'Tot', 'S', 'OSize',
                 'Code', 'Act', 'URL')
-        return self.fmt % body
+        return fmt % body
 
 class StartupRequest(Request):
     def endstage(self):
@@ -154,12 +162,13 @@ class Cumulative:
 
     def put(self, request):
         elapsed = request.elapsed
-        if elapsed == "I":
+        if elapsed is None:
             self.hangs = self.hangs + 1
-        self.times.append(elapsed)
+        else:
+            self.times.append(elapsed)
 
     def all(self):
-        if self.allelapsed == None:
+        if self.allelapsed is None:
             self.allelapsed = []
             for elapsed in self.times:
                 self.allelapsed.append(elapsed)
@@ -167,41 +176,46 @@ class Cumulative:
         return self.allelapsed
 
     def __str__(self):
+        fmt = "%5s %5s %8.2f %5.2f %5.2f %5.2f %5.2f %s"
         body = (
             self.hangs, self.hits(), self.total(), self.max(), self.min(),
             self.median(), self.mean(), self.url
             )
-        return self.fmt % body
+        return fmt % body
 
     def getheader(self):
-        return self.fmt % ('Hangs', 'Hits', 'Total', 'Max', 'Min', 'Median',
-                           'Mean', 'URL')
-
-    fmt = "%5s %5s %5s %5s %5s %6s %5s %s"
+        fmt = '%5s %5s %8s %5s %5s %5s %5s %s'
+        return fmt % ('Hangs', 'Hits', 'Total', 'Max', 'Min', 'Med',
+                      'Mean', 'URL')
 
     def hits(self):
         return len(self.times)
 
     def max(self):
-        return max(self.all())
+        all = self.all()
+        if not all:
+            return 0
+        return max(all)
 
     def min(self):
-        return min(self.all())
+        all = self.all()
+        if not all:
+            return 0
+        return min(all)
 
     def mean(self):
         l = len(self.times)
         if l == 0:
-            return "I"
+            return 0
         else:
             t = self.total()
-            if t == "I": return "I"
             return t/l
 
     def median(self):
         all = self.all()
         l = len(all)
         if l == 0:
-            return "I"
+            return 0
         else:
             if l == 1:
                 return all[0]
@@ -213,25 +227,23 @@ class Cumulative:
                 i2 = i + 1
                 v1 = all[i]
                 v2 = all[i2]
-                if isinstance(v1, StringType) or isinstance(v2, StringType):
-                    return "I"
-                else: return (v1 + v2) / 2
+                return (v1 + v2) / 2
 
     def total(self):
         t = 0
         all = self.all()
         for elapsed in all:
-            if elapsed == "I":
+            if elapsed is None:
                 continue
             t = t + elapsed
-        return t
+        return float(t)
 
-def parsebigmlogline(line):
-    tup = line.split(None, 3)
-    if len(tup) == 3:
-        code, id, timestr = tup
-        return code, id, timestr, ''
-    elif len(tup) == 4:
+def parselogline(line):
+    tup = line.split(None, 4)
+    if len(tup) == 4:
+        code, pid, id, timestr = tup
+        return code, pid, id, timestr, ''
+    elif len(tup) == 5:
         return tup
     else:
         return None
@@ -247,18 +259,18 @@ def get_earliest_file_data(files):
             continue
         linelen = len(line)
         line = line.strip()
-        tup = parsebigmlogline(line)
+        tup = parselogline(line)
         if tup is None:
             print "Could not interpret line: %s" % line
             continue
-        code, id, timestr, desc = tup
+        code, pid, id, timestr, desc = tup
         timestr = timestr.strip()
-        fromepoch = getdate(timestr)
+        fromepoch = float(timestr)
         temp[file] = linelen
         if earliest_fromepoch == 0 or fromepoch < earliest_fromepoch:
             earliest_fromepoch = fromepoch
             earliest = file
-            retn = [code, id, fromepoch, desc]
+            retn = [code, pid, id, fromepoch, desc]
 
     for file, linelen in temp.items():
         if file is not earliest:
@@ -282,32 +294,37 @@ def get_requests(files, start=None, end=None, statsfname=None,
             tup = get_earliest_file_data(files)
             if tup is None:
                 break
-            code, id, fromepoch, desc = tup
-            if start is not None and fromepoch < start: continue
-            if end is not None and fromepoch > end: break
+            code, pid, id, fromepoch, desc = tup
+            if start is not None and fromepoch < start:
+                continue
+            if end is not None and fromepoch > end:
+                break
             if code == 'U':
-                finished.extend(unfinished.values())
-                unfinished.clear()
+                # restart
+                for upid, uid in list(unfinished.keys()):
+                    if upid == pid:
+                        val = unfinished[(upid, uid)]
+                        finished.append(val)
+                        del unfinished[(upid, uid)]
                 request = StartupRequest()
                 request.url = desc
-                request.start = int(fromepoch)
+                request.start = fromepoch
                 finished.append(request)
                 continue
-            request = unfinished.get(id)
+            request = unfinished.get((pid, id))
             if request is None:
                 if code != "B":
                     continue # garbage at beginning of file
                 request = Request()
                 for pending_req in unfinished.values():
                     pending_req.active = pending_req.active + 1
-                unfinished[id] = request
-            t = int(fromepoch)
+                unfinished[(pid, id)] = request
             try:
-                request.put(code, t, desc)
+                request.put(code, fromepoch, desc)
             except:
-                print "Unable to handle entry: %s %s %s"%(code, t, desc)
+                print "Unable to handle entry: %s %s %s"%(code, fromepoch, desc)
             if request.isfinished():
-                del unfinished[id]
+                del unfinished[(pid, id)]
                 finished.append(request)
 
         finished.extend(unfinished.values())
@@ -324,20 +341,21 @@ def get_requests(files, start=None, end=None, statsfname=None,
     return requests
 
 def analyze(requests, top, sortf, start=None, end=None, mode='cumulative',
-            resolution=60, urlfocusurl=None, urlfocustime=60):
+            resolution=60, urlfocusurl=None, urlfocustime=60, verbose=False):
 
     if mode == 'cumulative':
         cumulative = {}
         for request in requests:
-            url = request.url
-            stats = cumulative.get(url)
-            if stats is None:
-                stats = Cumulative(url)
-                cumulative[url] = stats
-            stats.put(request)
+            if not isinstance(request, StartupRequest):
+                url = request.url
+                stats = cumulative.get(url)
+                if stats is None:
+                    stats = Cumulative(url)
+                    cumulative[url] = stats
+                stats.put(request)
         requests = cumulative.values()
         requests.sort(sortf)
-        write(requests, top)
+        write(requests, top, verbose)
 
     elif mode=='timed':
         computed_start = requests[0].start
@@ -357,7 +375,7 @@ def analyze(requests, top, sortf, start=None, end=None, mode='cumulative',
 
     else:
         requests.sort(sortf)
-        write(requests, top)
+        write(requests, top, verbose)
 
 def urlfocuswrite(requests, url, t):
     l = []
@@ -414,9 +432,9 @@ def urlfocuswrite(requests, url, t):
     for k,v in after:
         print v, requests[k].url
 
-def write(requests, top=0):
+def write(requests, top=0, verbose=False):
     if len(requests) == 0:
-        print "No data.\n"
+        print "No data."
         return
     i = 0
     header = requests[0].getheader()
@@ -440,13 +458,6 @@ def getdate(val):
     except:
         raise ProfileException, "bad date %s" % val
 
-def getTimeslice(period, utime):
-    low = int(math.floor(utime)) - period + 1
-    high = int(math.ceil(utime)) + 1
-    for x in range(low, high):
-        if x % period == 0:
-            return x
-
 def timewrite(requests, start, end, resolution):
     print "Start: %s    End: %s   Resolution: %d secs" % \
         (tick2str(start), tick2str(end), resolution)
@@ -459,9 +470,11 @@ def timewrite(requests, start, end, resolution):
     min = None
     for r in requests:
         t = r.start
-        slice = getTimeslice(resolution,t)
-        if slice > max: max = slice
-        if (min is None) or (slice < min): min = slice
+        slice = t - (t % resolution)
+        if slice > max:
+            max = slice
+        if (min is None) or (slice < min):
+            min = slice
         if d.has_key(slice):
             d[slice] = d[slice] + 1
         else:
@@ -471,9 +484,10 @@ def timewrite(requests, start, end, resolution):
     hits = 0
     avg_requests = None
     max_requests = 0
-    for slice in range(min, max, resolution):
+    for slice in range(int(min), int(max), resolution):
         num = d.get(slice, 0)
-        if num>max_requests: max_requests = num
+        if num>max_requests:
+            max_requests = num
         hits = hits + num
 
         if avg_requests is None:
@@ -553,7 +567,7 @@ specified url is given.
 
 Each 'filename' is a path to a trace log that contains detailed
 request data.  Multiple input files can be analyzed at the same time
-by providing the path to each file.  (Analyzing multiple big trace log
+by providing the path to each file.  (Analyzing multiple trace log
 files at once is useful if you have more than one machine running your
 application and you'd like to get an overview of all logs on those
 machines).
@@ -584,9 +598,9 @@ For cumulative reports, the following sort specs are accepted:
 For detailed (non-cumulative) reports, the following sort specs are accepted:
 
   'start'       -- the start time of the request to repoze.debug (ascending)
-  'win'         -- the num of secs repoze.debug spent waiting for input from client
-  'wout'        -- the secs repoze.debug spent waiting for output from the app
-  'wend'        -- the secs repoze.debug spent sending data to the client
+  'win'         -- the num of secs repoze.debug spent waiting for input
+  'wout'        -- the secs repoze.debug spent waiting for output from app
+  'wend'        -- the secs repoze.debug spent sending data to server
   'total'       -- the secs taken for the request from begin to end
   'endstage'    -- the last successfully completed request stage (B, I, A, E)
   'osize'       -- the size in bytes of output provided by repoze.debug
@@ -618,10 +632,10 @@ specifies the number of seconds to target before and after the URL
 provided in urlfocus mode.  (default is 10 seconds).
 
 If the 'start' argument is specified in the form 'DD/MM/YYYY HH:MM:SS'
-(UTC), limit results to hits received after this date/time.
+(local time), limit results to hits received after this date/time.
 
 If the 'end' argument is specified in the form 'DD/MM/YYYY HH:MM:SS'
-(UTC), limit results to hits received before this date/time.
+(local time), limit results to hits received before this date/time.
 
 'start' and 'end' arguments are not honored when request stats are obtained
 via the --readstats argument.
@@ -662,8 +676,8 @@ Examples:
     --end='2001/05/11 23:00:00'
 
     Show detailed report statistics for entries in 'debug.log' which
-    begin after 6am UTC on May 10, 2001 and which end before
-    11pm UTC on May 11, 2001.
+    begin after 6am local time on May 10, 2001 and which end before
+    11pm local time on May 11, 2001.
 
   %(pname)s debug.log --timed --resolution=300 --start='2001/05/10 06:00:00'
     --end='2001/05/11 23:00:00'
@@ -710,12 +724,12 @@ If the --help argument is given, detailed usage docs are provided."""
     return usage
 
 def main():
-    global verbose
-    
     if len(sys.argv) == 1:
         print usage()
         sys.exit(0)
-    if sys.argv[1] == '--help': print detailedusage(); sys.exit(0)
+    if sys.argv[1] == '--help':
+        print detailedusage()
+        sys.exit(0)
     mode = 'cumulative'
     sortby = None
     trim = 0
@@ -734,7 +748,9 @@ def main():
     i = 1
     for arg in sys.argv[1:]:
         if arg[:2] != '--':
-            if arg[-3:] == '.gz' and globals().has_key('gzip'):
+            if arg[-3:] == '.gz':
+                if gzip is None:
+                    raise ValueError('No gzip support to ungzip %s' % arg)
                 files.append(gzip.GzipFile(arg,'r'))
             else:
                 files.append(open(arg))
@@ -756,9 +772,13 @@ def main():
             elif opt=='--writestats':
                 statsfname = val
                 writestats = 1
-            if opt=='--sort': sortby = val
-            if opt=='--top': top=int(val)
-            if opt=='--help': print detailedusage(); sys.exit(0)
+            if opt=='--sort':
+                sortby = val
+            if opt=='--top':
+                top=int(val)
+            if opt=='--help':
+                print detailedusage()
+                sys.exit(0)
             if opt=='--verbose':
                 verbose = 1
             if opt=='--resolution':
@@ -829,7 +849,7 @@ def main():
 
         req=get_requests(files, start, end, statsfname, writestats, readstats)
         analyze(req, top, sortf, start, end, mode, resolution, urlfocusurl,
-                urlfocustime)
+                urlfocustime, verbose)
 
     except AssertionError, val:
         a = "%s is not a valid %s sort spec, use one of %s"

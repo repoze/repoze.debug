@@ -41,3 +41,9 @@ body {
     color:black;
     border:dashed gray 1px;
 }
+
+.entry-value {
+  margin-left: 0.6em;
+  font-size: 12px;
+  font-family:monospace;
+}

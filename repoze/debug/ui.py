@@ -117,7 +117,7 @@ class DebugGui(object):
                 # If the response is text/xml, then include. If 
                 # text/html, cgi.escape and include. Otherwise, skip.
                 rh = dict(response['headers'])
-                ct = rh.get('content-type')
+                ct = rh.get('Content-Type')
                 if ct is None:
                     # 40x errors don't generate a content type
                     body = ''

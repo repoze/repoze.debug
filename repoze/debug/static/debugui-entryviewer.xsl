@@ -8,10 +8,108 @@
     <xsl:variable name="entryid" select="/atom:feed/@selected"/>
     <xsl:template match="/">
         <div>
-            <xsl:apply-templates select="/atom:feed/atom:entry[atom:id=$entryid]"/>
+            <xsl:apply-templates select="/atom:feed/atom:entry[atom:id=$entryid]" mode="plain"/>
         </div>
     </xsl:template>
-    <xsl:template match="atom:entry">
+    <xsl:template match="atom:entry" mode="plain">
+        <!-- A plain-text oriented basic view. -->
+        <div>
+            <h1>
+                <xsl:value-of select="atom:title"/>
+            </h1>
+            <h2>Request</h2>
+            <div>
+                <xsl:for-each select="atom:content/rz:logentry/rz:request">
+                    <div>
+                        <strong>Begin:</strong>
+                        <span class="entry-value">
+                            <xsl:value-of select="rz:begin"/>
+                        </span>
+                    </div>
+                    <div>
+                        <strong>Method:</strong>
+                        <span class="entry-value">
+                            <xsl:value-of select="rz:method"/>
+                        </span>
+                    </div>
+                    <div>
+                        <strong>URL:</strong>
+                        <span class="entry-value">
+                            <xsl:value-of select="rz:url"/>
+                        </span>
+                    </div>
+                    <xsl:for-each select="rz:cgi_variable">
+                        <div>
+                            <strong><xsl:value-of select="@name"/>:</strong>
+                            <span class="entry-value">
+                                <xsl:value-of select="."/>
+                            </span>
+                        </div>
+                    </xsl:for-each>
+                    <xsl:for-each select="rz:wgi_variable">
+                        <div>
+                            <strong><xsl:value-of select="@name"/>:</strong>
+                            <span class="entry-value">
+                                <xsl:value-of select="."/>
+                            </span>
+                        </div>
+                    </xsl:for-each>
+                </xsl:for-each>
+            </div>
+            <h2>Response</h2>
+            <xsl:choose>
+                <xsl:when test="atom:content/rz:logentry/rz:response">
+                    <div>
+                        <xsl:for-each select="atom:content/rz:logentry/rz:response">
+                            <div>
+                                <strong>Begin:</strong>
+                                <span class="entry-value">
+                                    <xsl:value-of select="rz:begin"/>
+                                </span>
+                            </div>
+                            <div>
+                                <strong>End:</strong>
+                                <span class="entry-value">
+                                    <xsl:value-of select="rz:end"/>
+                                </span>
+                            </div>
+                            <div>
+                                <strong>Status:</strong>
+                                <span class="entry-value">
+                                    <xsl:value-of select="rz:status"/>
+                                </span>
+                            </div>
+                            <div>
+                                <strong>Content Length:</strong>
+                                <span class="entry-value">
+                                    <xsl:value-of select="rz:content-length"/>
+                                </span>
+                            </div>
+                            <xsl:for-each select="header">
+                                <div>
+                                    <strong><xsl:value-of select="@name"/>:</strong>
+                                    <span class="entry-value">
+                                        <xsl:value-of select="."/>
+                                    </span>
+                                </div>
+                            </xsl:for-each>
+                            <div>
+                                <strong>Body:</strong>
+                                <span class="entry-value">
+                                    <xsl:value-of select="rz:body"/>
+                                </span>
+                            </div>
+                        </xsl:for-each>
+                    </div>
+                </xsl:when>
+                <xsl:otherwise>
+                    <em>No response.</em>
+                </xsl:otherwise>
+            </xsl:choose>
+
+        </div>
+    </xsl:template>
+    <xsl:template match="atom:entry" mode="visual">
         <div>
             <h1>
                 <xsl:value-of select="atom:title"/>
@@ -118,7 +216,10 @@
         </xsl:for-each>
         <xsl:choose>
             <xsl:when test="node()">
-                <xsl:text>&gt;</xsl:text><xsl:if test="/*=parent::*"><div>&#xA;</div></xsl:if>
+                <xsl:text>&gt;</xsl:text>
+                <xsl:if test="/*=parent::*">
+                    <div>&#xA;</div>
+                </xsl:if>
                 <xsl:apply-templates mode="xmlverb">
 
                     <xsl:with-param name="indent-elements" select="$indent-elements"/>
@@ -140,10 +241,12 @@
                     <xsl:value-of select="local-name()"/>
 
                 </span>
-                <xsl:text>&gt;</xsl:text><div>&#xA;</div>
+                <xsl:text>&gt;</xsl:text>
+                <div>&#xA;</div>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:text> /&gt;</xsl:text><div>&#xA;</div>
+                <xsl:text> /&gt;</xsl:text>
+                <div>&#xA;</div>
             </xsl:otherwise>
         </xsl:choose>
         <xsl:if test="not(parent::*)">

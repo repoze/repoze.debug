@@ -118,7 +118,7 @@
         </xsl:for-each>
         <xsl:choose>
             <xsl:when test="node()">
-                <xsl:text>&gt;</xsl:text>
+                <xsl:text>&gt;</xsl:text><xsl:if test="/*=parent::*"><div>&#xA;</div></xsl:if>
                 <xsl:apply-templates mode="xmlverb">
 
                     <xsl:with-param name="indent-elements" select="$indent-elements"/>
@@ -130,7 +130,6 @@
                     <xsl:value-of select="$indent"/>
                 </xsl:if>
                 <xsl:text>&lt;/</xsl:text>
-
                 <xsl:if test="$ns-prefix != ''">
                     <span class="xmlverb-element-nsprefix">
                         <xsl:value-of select="$ns-prefix"/>
@@ -141,10 +140,10 @@
                     <xsl:value-of select="local-name()"/>
 
                 </span>
-                <xsl:text>&gt;</xsl:text>
+                <xsl:text>&gt;</xsl:text><div>&#xA;</div>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:text> /&gt;</xsl:text>
+                <xsl:text> /&gt;</xsl:text><div>&#xA;</div>
             </xsl:otherwise>
         </xsl:choose>
         <xsl:if test="not(parent::*)">

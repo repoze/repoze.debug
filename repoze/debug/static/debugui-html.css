@@ -20,23 +20,23 @@ body {
 #selected-entry {
     margin-left: 260px;
 }
-.tree-entry, .tree-item-entry {
+.tree-group, .tree-item-entry {
     margin-bottom: 0.6em;
 }
 .tree-item {
     margin-left: 0.8em;
 }
-.tree-entry > div > a {
+.tree-group > div > a {
     font-weight:bold;
 }
-.tree-entry a, .tree-item a {
+.tree-group a, .tree-item-entry a {
     text-decoration: none;
     color: black;
     background-color:silver;
     padding-top: 0.2em;
     padding-bottom: 0.2em;
 }
-.tree-entry a:hover, .tree-item a:hover {
+.tree-group a:hover, .tree-item-entry a:hover {
     color:black;
     border:dashed gray 1px;
 }

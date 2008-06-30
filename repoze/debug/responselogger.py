@@ -219,9 +219,10 @@ def get_request_id(when, period=.10, max=10000, lock=threading.Lock()):
         if this_period != _CURRENT_PERIOD:
             _CURRENT_PERIOD = this_period
             _PERIOD_COUNTER = 0
-        if _PERIOD_COUNTER > max:
+        if _PERIOD_COUNTER >= max:
             raise ValueError('> %s items within %s period' % (max, period))
-        result = when + (_PERIOD_COUNTER / float(max))
+        bump = _PERIOD_COUNTER / float(max) * period
+        result = when + bump
         _PERIOD_COUNTER += 1
     finally:
         lock.release()

@@ -175,6 +175,39 @@ class TestMakeResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(mw.max_bodylen, 0)
         self.assertEqual(mw.keep, 0)
 
+class TestGetRequestId(unittest.TestCase):
+    def setUp(self):
+        from repoze.debug import responselogger
+        responselogger._CURRENT_PERIOD = None
+        responselogger._PERIOD_COUNTER = 0
+        
+    def _getFUT(self):
+        from repoze.debug.responselogger import get_request_id
+        return get_request_id
+
+    def test_nodupes_to_max(self):
+        when = 1
+        f = self._getFUT()
+        D = {}
+        max = 10000
+        for x in range(0, max):
+            key = f(when)
+            D[key] = True
+
+        keys = sorted(D.keys())
+        self.assertEqual(len(keys), max)
+
+    def test_nodupes_past_max(self):
+        f = self._getFUT()
+        def doit():
+            max = 1000
+            when = 1
+            D = {}
+            for x in range(0, 1001):
+                key = f(when, max=max)
+                D[key] = True
+        self.assertRaises(ValueError, doit)
+
 class FakeStartResponse:
     def __call__(self, status, headers, exc_info=None):
         self.status = status

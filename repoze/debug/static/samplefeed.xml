@@ -1,40 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xmlns:rz="http://repoze.org/namespace">
-    <title>Example Feed</title>
-    <link href="http://example.org/"/>
-    <updated>2003-12-13T18:30:02Z</updated>
-    <author>
-        <name>John Doe</name>
-    </author>
-    <id>urn:uuid:60a76c80-d399-11d9-b93C-0003a39e9bf6</id>
-    <updated>2003-12-13T18:30:02Z</updated>
+<atom:feed xmlns:atom="http://www.w3.org/2005/Atom" xmlns:rz="http://repoze.org/namespace">
+    <atom:title>Example Feed</atom:title>
+    <atom:link href="http://example.org/"/>
+    <atom:updated>2003-12-13T18:30:02Z</atom:updated>
+    <atom:author>
+        <atom:name>John Doe</atom:name>
+    </atom:author>
+    <atom:id>urn:uuid:60a76c80-d399-11d9-b93C-0003a39e9bf6</atom:id>
+    <atom:updated>2003-12-13T18:30:02Z</atom:updated>
 
-    <entry>
-        <id>urn:uuid:20323</id>
-        <title>/profile/paul/edit.html</title>
-        <link href="http://www.google.com/"/>
-        <updated>2003-12-13T18:31:01Z</updated>
-        <content>
-            <rz:entry elapsed="32.0">
-                <rz:request/>
-                <rz:response tid="1744480">
+    <atom:entry>
+        <atom:id>urn:uuid:20323</atom:id>
+        <atom:title>/profile/paul/edit.html</atom:title>
+        <atom:link href="http://www.google.com/"/>
+        <atom:updated>2003-12-13T18:31:01Z</atom:updated>
+        <atom:content>
+            <rz:logentry id="1214835124.656971">
+                <rz:request>
+                    <rz:begin>1214835124.656971</rz:begin>
+                    <rz:cgi_variable name="CONTENT_LENGTH">0</rz:cgi_variable>
+                    <rz:cgi_variable name="HTTP_ACCEPT"
+                        >text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</rz:cgi_variable>
+                    <rz:cgi_variable name="HTTP_ACCEPT_CHARSET">ISO-8859-1,utf-8;q=0.7,*;q=0.7</rz:cgi_variable>
+                    <rz:cgi_variable name="HTTP_ACCEPT_ENCODING">gzip,deflate</rz:cgi_variable>
+                    <rz:cgi_variable name="HTTP_ACCEPT_LANGUAGE">en-us,en;q=0.5</rz:cgi_variable>
+                    <rz:cgi_variable name="HTTP_CACHE_CONTROL">max-age=0</rz:cgi_variable>
+                    <rz:cgi_variable name="HTTP_CONNECTION">keep-alive</rz:cgi_variable>
+                    <rz:cgi_variable name="HTTP_HOST">localhost:8090</rz:cgi_variable>
+                    <rz:cgi_variable name="HTTP_KEEP_ALIVE">300</rz:cgi_variable>
+                    <rz:cgi_variable name="HTTP_USER_AGENT">Mozilla/5.0 (Macintosh; U; Intel Mac OS
+                        X 10.5; en-US; rv:1.9) Gecko/2008061004 Firefox/3.0</rz:cgi_variable>
+                    <rz:cgi_variable name="PATH_INFO">/foo4</rz:cgi_variable>
+                    <rz:cgi_variable name="REMOTE_ADDR">127.0.0.1</rz:cgi_variable>
+                    <rz:cgi_variable name="REQUEST_METHOD">GET</rz:cgi_variable>
+                    <rz:cgi_variable name="SERVER_NAME">127.0.0.1</rz:cgi_variable>
+                    <rz:cgi_variable name="SERVER_PORT">8090</rz:cgi_variable>
+                    <rz:cgi_variable name="SERVER_PROTOCOL">HTTP/1.1</rz:cgi_variable>
+                    <rz:method>GET</rz:method>
+                    <rz:url>http://localhost:8090/foo4</rz:url>
+                    <rz:wsgi_variable name="application">&lt;myapp.MyApp object at
+                        0x7821b0&gt;</rz:wsgi_variable>
+                    <rz:wsgi_variable name="paste.httpserver.thread_pool"
+                        >&lt;paste.httpserver.ThreadPool object at 0x77fff0&gt;</rz:wsgi_variable>
+                    <rz:wsgi_variable name="wsgi process">Multithreaded</rz:wsgi_variable>
+                    <rz:wsgi_variable name="response"/>
+                </rz:request>
+                <rz:response>
+                    <rz:begin>1214835124.6575179</rz:begin>
+                    <rz:end>1214835124.6586039</rz:end>
+                    <rz:content-length>20</rz:content-length>
+                    <rz:header name="content-type">text/html; charset=UTF-8</rz:header>
+                    <rz:header name="Content-Length">20</rz:header>
+                    <rz:status>200 OK</rz:status>
                     <rz:body>
-                        <response>
-                            <view id="profile-edit">
-                                <formcontroller type="Profile" mode="edit"/>
-                            </view>
-                        </response>
+                        <h1>Test Mode 2</h1>
                     </rz:body>
                 </rz:response>
-            </rz:entry>
-        </content>
-    </entry>
-    <entry>
-        <id>urn:uuid:a1</id>
-        <title>/typedefs.xml</title>
-        <updated>2003-12-13T18:31:02Z</updated>
-        <content>
-            <rz:entry elapsed="0.9">
+            </rz:logentry>
+        </atom:content>
+        <atom:summary>{'id': 1214835124.656971, 'request': {'begin': 1214835124.656971,
+            'cgi_variables': [('CONTENT_LENGTH', '0'), ('HTTP_ACCEPT',
+            'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+            ('HTTP_ACCEPT_CHARSET', 'ISO-8859-1,utf-8;q=0.7,*;q=0.7'), ('HTTP_ACCEPT_ENCODING',
+            'gzip,deflate'), ('HTTP_ACCEPT_LANGUAGE', 'en-us,en;q=0.5'), ('HTTP_CACHE_CONTROL',
+            'max-age=0'), ('HTTP_CONNECTION', 'keep-alive'), ('HTTP_HOST', 'localhost:8090'),
+            ('HTTP_KEEP_ALIVE', '300'), ('HTTP_USER_AGENT', 'Mozilla/5.0 (Macintosh; U; Intel Mac OS
+            X 10.5; en-US; rv:1.9) Gecko/2008061004 Firefox/3.0'), ('PATH_INFO', '/foo4'),
+            ('REMOTE_ADDR', '127.0.0.1'), ('REQUEST_METHOD', 'GET'), ('SERVER_NAME', '127.0.0.1'),
+            ('SERVER_PORT', '8090'), ('SERVER_PROTOCOL', 'HTTP/1.1')], 'method': 'GET', 'url':
+            'http://localhost:8090/foo4', 'wsgi_variables': [('application', &lt;myapp.MyApp
+            object at 0x7821b0&gt;), ('paste.httpserver.thread_pool',
+            &lt;paste.httpserver.ThreadPool object at 0x77fff0&gt;), ('wsgi process',
+            'Multithreaded')]}, 'response': {'begin': 1214835124.6575179, 'body':
+            '&lt;h1&gt;Test Mode 2&lt;/h1&gt;', 'content-length': 20, 'end':
+            1214835124.6586039, 'headers': [('content-type', 'text/html; charset=UTF-8'),
+            ('Content-Length', '20')], 'status': '200 OK'}}</atom:summary>
+    </atom:entry>
+    <atom:entry>
+        <atom:id>urn:uuid:a1</atom:id>
+        <atom:title>/typedefs.xml</atom:title>
+        <atom:updated>2003-12-13T18:31:02Z</atom:updated>
+        <atom:content>
+            <rz:logentry>
                 <rz:request tid="1744480"/>
                 <rz:response>
                     <rz:body>
@@ -43,15 +90,15 @@
                         </typedefs>
                     </rz:body>
                 </rz:response>
-            </rz:entry>
-        </content>
-    </entry>
-    <entry>
-        <id>urn:uuid:a2</id>
-        <title>/user.xml</title>
-        <updated>2003-12-13T18:31:03Z</updated>
-        <content>
-            <rz:entry elapsed="12.7">
+            </rz:logentry>
+        </atom:content>
+    </atom:entry>
+    <atom:entry>
+        <atom:id>urn:uuid:a2</atom:id>
+        <atom:title>/user.xml</atom:title>
+        <atom:updated>2003-12-13T18:31:03Z</atom:updated>
+        <atom:content>
+            <rz:logentry>
                 <rz:request tid="1744480"/>
                 <rz:response>
                     <rz:body>
@@ -60,19 +107,19 @@
                         </user>
                     </rz:body>
                 </rz:response>
-            </rz:entry>
-        </content>
-    </entry>
+            </rz:logentry>
+        </atom:content>
+    </atom:entry>
 
 
 
 
-    <entry>
-        <id>urn:uuid:734661</id>
-        <title>/communities</title>
-        <updated>2003-12-13T18:31:04Z</updated>
-        <content>
-            <rz:entry elapsed="23.1">
+    <atom:entry>
+        <atom:id>urn:uuid:734661</atom:id>
+        <atom:title>/communities</atom:title>
+        <atom:updated>2003-12-13T18:31:04Z</atom:updated>
+        <atom:content>
+            <rz:logentry>
                 <rz:response tid="92394480">
                     <rz:body>
                         <user>
@@ -80,15 +127,15 @@
                         </user>
                     </rz:body>
                 </rz:response>
-            </rz:entry>
-        </content>
-    </entry>
-    <entry>
-        <id>urn:uuid:b2</id>
-        <title>/user.xml</title>
-        <updated>2003-12-13T18:31:05Z</updated>
-        <content>
-            <rz:entry elapsed="14.9">
+            </rz:logentry>
+        </atom:content>
+    </atom:entry>
+    <atom:entry>
+        <atom:id>urn:uuid:b2</atom:id>
+        <atom:title>/user.xml</atom:title>
+        <atom:updated>2003-12-13T18:31:05Z</atom:updated>
+        <atom:content>
+            <rz:logentry>
                 <rz:request tid="92394480"/>
                 <rz:response>
                     <rz:body>
@@ -97,15 +144,15 @@
                         </user>
                     </rz:body>
                 </rz:response>
-            </rz:entry>
-        </content>
-    </entry>
-    <entry>
-        <id>urn:uuid:b3</id>
-        <title>siteconfig.xml</title>
-        <updated>2003-12-13T18:31:06Z</updated>
-        <content>
-            <rz:entry elapsed="4.8">
+            </rz:logentry>
+        </atom:content>
+    </atom:entry>
+    <atom:entry>
+        <atom:id>urn:uuid:b3</atom:id>
+        <atom:title>siteconfig.xml</atom:title>
+        <atom:updated>2003-12-13T18:31:06Z</atom:updated>
+        <atom:content>
+            <rz:logentry>
                 <rz:request tid="92394480"/>
                 <rz:response>
                     <rz:body>
@@ -114,7 +161,7 @@
                         </siteconfig>
                     </rz:body>
                 </rz:response>
-            </rz:entry>
-        </content>
-    </entry>
-</feed>
+            </rz:logentry>
+        </atom:content>
+    </atom:entry>
+</atom:feed>

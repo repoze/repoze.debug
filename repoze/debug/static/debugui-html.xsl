@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns="http://www.w3.org/1999/xhtml" xmlns:atom="http://www.w3.org/2005/Atom"
     xmlns:rz="http://repoze.org/namespace" exclude-result-prefixes="atom rz"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    <xsl:key name="getsubentry" match="atom:entry" use="atom:content/rz:entry/rz:request/@tid"/>
+    <xsl:key name="getsubentry" match="atom:entry" use="atom:content/rz:logentry/rz:request/@tid"/>
     <xsl:output method="html" indent="yes"/>
     <xsl:param name="items-style">flat</xsl:param>
     <xsl:template match="/">
@@ -37,7 +37,7 @@
     -->
     <xsl:template match="/atom:feed" mode="tree">
         <div>
-            <xsl:apply-templates select="atom:entry[atom:content/rz:entry/rz:response/@tid]"
+            <xsl:apply-templates select="atom:entry[atom:content/rz:logentry/rz:response/@tid]"
                 mode="tree-group"/>
         </div>
     </xsl:template>
@@ -45,7 +45,7 @@
         <!-- The parent request is the one with a @tid on the response -->
         <div class="tree-group">
             <xsl:apply-templates select="." mode="item"/>
-            <xsl:variable name="thistid" select="atom:content/rz:entry/rz:response/@tid"/>
+            <xsl:variable name="thistid" select="atom:content/rz:logentry/rz:response/@tid"/>
             <div class="tree-item">
                 <xsl:apply-templates select="key('getsubentry', $thistid)" mode="item"/>
             </div>

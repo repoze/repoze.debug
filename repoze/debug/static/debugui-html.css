@@ -6,7 +6,7 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    width: 230px;
+    width: 280px;
     height: 100%;
     background-color: silver;
     color: black;
@@ -15,10 +15,11 @@ body {
 #logtree {
     margin: 0.4em;
     height: 90%;
-    padding: 0.2em
+    padding: 0.2em;
+    font-size: smaller;
 }
 #selected-entry {
-    margin-left: 260px;
+    margin-left: 310px;
 }
 .tree-group, .tree-item-entry {
     margin-bottom: 0.6em;

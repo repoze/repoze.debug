@@ -80,6 +80,16 @@ example::
 The middleware will log verbose response data to ``response.log`` and
 will log trace data to ``trace.log``.
 
+Debug UI
+--------
+
+If you visit the path /__repoze.debug/static/debugui.html in your
+browser against a WSGI server that has the responselogger middleware
+in the main pipeline, you will see a paned debug interface much like
+http://static.repoze.org/misc/repoze-debug1.png .  Here you can view
+recent requests and responses via this UI (as many request/response
+pairs are kept around as "keep" is set to in the config).
+
 Verbose logger
 --------------
 
@@ -370,6 +380,7 @@ Sample output from ``wsgirequestprofiler trace.log``::
       0     1     0.02  0.02  0.02  0.02  0.02 http://localhost:9971/empty.css
       0     1     0.01  0.01  0.01  0.01  0.01 http://localhost:9971/ehs/archive
       0     1     0.01  0.01  0.01  0.01  0.01 http://localhost:9971/ehs/ehn_alt
+
 
 canary middleware
 =================

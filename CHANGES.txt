@@ -1,4 +1,4 @@
-Next release
+0.5 (2008/06/30)
 
   - Make debug request id reflect approximate UNIX time rather than a
     random debug id.
@@ -9,7 +9,8 @@ Next release
   - Default max_bodysize is now 3K rather than the entire response
     body.
 
-  - User interface; keep entries around to show in GUI.
+  - User interface; keep entries around to show in GUI.  See
+    /__repoze.debug/static/debugui.html.
 
   - We now write two logs: a verbose log, and a trace log.  The
     verbose log contains information about headers, request

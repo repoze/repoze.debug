@@ -76,7 +76,8 @@ example::
             responselogger
             myapp
 
-The middleware will log response data to ``filename``.
+The middleware will log verbose response data to ``response.log`` and
+will log trace data to ``trace.log``.
 
 Verbose logger
 --------------

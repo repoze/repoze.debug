@@ -87,50 +87,46 @@ Once the middleware is in the pipeline, it will log human-readable
 information about requests and responses to the verbose logger.  An
 example of the verbose log output for a request follows::
 
-  --- REQUEST 860724193 at Fri Jun 13 18:40:47 2008 ---
-  URL: http://localhost:9971/p_/pl
+  --- begin REQUEST for 5930704 at Mon Jun 30 13:37:51 2008 ---
+  URL: GET http://127.0.0.1:9971/favicon.ico
   CGI Variables
     ACTUAL_SERVER_PROTOCOL: HTTP/1.1
-    AUTH_TYPE: Basic
     HTTP_ACCEPT: */*
-    HTTP_ACCEPT_ENCODING: gzip, deflate
-    HTTP_ACCEPT_LANGUAGE: en-us
-    HTTP_CONNECTION: keep-alive
-    HTTP_HOST: localhost:9971
-    HTTP_REFERER: http://localhost:9971/manage_menu
-    HTTP_USER_AGENT: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_2; en-us) AppleWebKit/525.18 (KHTML, like Gecko) Version/3.1.1 Safari/525.18
-    PATH_INFO: /p_/pl
+    HTTP_HOST: 127.0.0.1:9971
+    HTTP_USER_AGENT: ApacheBench/2.0.40-dev
+    PATH_INFO: /favicon.ico
     REMOTE_ADDR: 127.0.0.1
-    REMOTE_PORT: 51422
+    REMOTE_PORT: 56527
     REQUEST_METHOD: GET
     SERVER_NAME: vitaminf-2.local
     SERVER_PORT: 9971
-    SERVER_PROTOCOL: HTTP/1.1
+    SERVER_PROTOCOL: HTTP/1.0
     SERVER_SOFTWARE: CherryPy/3.0.2 WSGI Server
   WSGI Variables
-    repoze.debug.request_begin: 1213396847.41
+    application: <paste.httpexceptions.HTTPExceptionHandler object at 0x17c4b10>
     wsgi process: Multithreaded
-    repoze.debug.id: 860724193
-    application: <paste.httpexceptions.HTTPExceptionHandler object at 0x17a8fd0>
-  --- end REQUEST 860724193 ---
+  --- end REQUEST for 5930704 ---
 
 Each request is tagged with a (random) identifier.  A response is also
 written to the verbose log, and can be matched up to the request that
-generated it via the identifier.  Here's an example of a response in
-the log::
+generated it via the identifier.  If ``max_bodylen`` is specified and
+is nonzero, only the leading bytes of the body up to ``max_bodylen``
+are logged, otherwise the entire body is logged.  Here's an example of
+a response in the log::
 
-  --- RESPONSE 860724193 at Fri Jun 13 18:40:47 2008 (0.0083 seconds) ---
+  --- begin RESPONSE for 5930704 at Mon Jun 30 13:37:51 2008 ---
+  URL: GET http://127.0.0.1:9971/favicon.ico
   Status: 200 OK
   Response Headers
-    Cache-Control: public,max-age=60
-    Content-Length: 872
-    Content-Type: image/gif
-    Last-Modified: Thu, 06 Mar 2008 17:25:30 GMT
-  Bodylen: 872
+    Accept-Ranges: bytes
+    Content-Length: 112
+    Content-Type: application/octet-stream
+    Last-Modified: Thu, 29 May 2008 23:47:57 GMT
   Body:
-
-  1?9p?:'~?? ?0a???q?J?(I?|;@@???????@?????!?,H? ?H?`?2t???K.LH?`D?
-  --- end RESPONSE 860724193 ---
+  ^@^@^A^@^F^@^P^P^@^@^A^@ ^@h^D^@^@f^@^@^@^P^P^@^@^A^@^H^@h^E^@^@<CE>^D^@^@
+  ^@^@^A^@ ^@<A8>^P^@^@6
+  Bodylen: 112
+  --- end RESPONSE for 5930704 (0.03 seconds) ---
 
 Trace logger
 ------------
@@ -162,19 +158,22 @@ Where::
 
 For example::
 
-  U 78793 1214751832.51 1214751832.51
-  B 78793 1214751832.51 1214751832.51 GET http://127.0.0.1:9971/ehs
-  B 78793 1214751832.51 1214751832.51 GET http://127.0.0.1:9971/ehs
-  B 78793 1214751832.51 1214751832.51 GET http://127.0.0.1:9971/ehs
-  B 78793 1214751832.51 1214751832.51 GET http://127.0.0.1:9971/ehs
-  A 78793 1214751832.51 1214751834.65 200 1951
-  E 78793 1214751832.51 1214751834.65 1951
-  B 78793 1214751834.68 1214751834.68 GET http://127.0.0.1:9971/ehs
-  A 78793 1214751832.51 1214751834.69 200 1951
-  E 78793 1214751832.51 1214751834.7 1951
-  A 78793 1214751832.51 1214751834.71 200 1951
-  A 78793 1214751832.51 1214751834.72 200 1951
-  E 78793 1214751832.51 1214751834.71 1951
+  U 91978 5930704 1214847471.97
+  B 91978 5930704 1214847471.97 GET http://127.0.0.1:9971/favicon.ico
+  B 91978 17963168 1214847471.97 GET http://127.0.0.1:9971/favicon.ico
+  A 91978 17963168 1214847471.99 200 112
+  A 91978 5930704 1214847471.99 200 112
+  E 91978 17963168 1214847471.99 112
+  E 91978 5930704 1214847471.99 112
+  B 91978 18022448 1214847472.0 GET http://127.0.0.1:9971/favicon.ico
+  A 91978 18022448 1214847472.01 200 112
+  B 91978 48634016 1214847472.01 GET http://127.0.0.1:9971/favicon.ico
+  E 91978 18022448 1214847472.01 112
+  B 91978 7805232 1214847472.01 GET http://127.0.0.1:9971/favicon.ico
+  A 91978 48634016 1214847472.01 200 112
+  E 91978 48634016 1214847472.01 112
+  A 91978 7805232 1214847472.02 200 112
+  E 91978 7805232 1214847472.02 112
 
 This information is meant to be parsed with the included
 ``wsgirequestprofiler`` console script to help in debugging hangs or

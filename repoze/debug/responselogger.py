@@ -30,7 +30,7 @@ class ResponseLoggingMiddleware:
             gui = DebugGui(self)
             return gui(environ, start_response)
 
-        request_id = get_request_id(now)
+        request_id = id(environ)
         request_info = self.get_request_info(environ)
         request_info['begin'] = now
         self.log_request_begin(request_id, request_info)
@@ -197,36 +197,6 @@ class SuffixMultiplier:
 byte_size = SuffixMultiplier({'kb': 1024,
                               'mb': 1024*1024,
                               'gb': 1024*1024*1024L,})
-
-_CURRENT_PERIOD = None
-_PERIOD_COUNTER = 0
-
-def get_request_id(when, period=.10, max=10000, lock=threading.Lock()):
-    """
-    We'd like to hand out a request id that is related to UNIX time
-    but more unique than low-resolution timers (e.g. Windows) can give
-    us.  To do so, we keep around 1/10 of a sec worth of history and
-    we keep up to max slots for entries within this period,
-    effectively limiting us to max / period items per second.  In the
-    default configuration, this means we can hand out 100000 rids per
-    second maximum.
-    """
-    this_period = when - (when % period)
-    global _CURRENT_PERIOD
-    global _PERIOD_COUNTER
-    lock.acquire()
-    try:
-        if this_period != _CURRENT_PERIOD:
-            _CURRENT_PERIOD = this_period
-            _PERIOD_COUNTER = 0
-        if _PERIOD_COUNTER >= max:
-            raise ValueError('> %s items within %s period' % (max, period))
-        bump = _PERIOD_COUNTER / float(max) * period
-        result = when + bump
-        _PERIOD_COUNTER += 1
-    finally:
-        lock.release()
-    return result
 
 def make_middleware(app,
                     global_conf,

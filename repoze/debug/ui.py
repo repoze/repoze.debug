@@ -2,10 +2,15 @@
 
 """
 
-from webob import Request, Response
+import cgi
 import mimetypes
-from webob import exc
 import os
+import pprint
+import time
+
+from webob import exc
+from webob import Request
+from webob import Response
 
 _HERE = os.path.abspath(os.path.dirname(__file__))
 gui_flag = '__repoze.debug'
@@ -18,14 +23,6 @@ def get_mimetype(filename):
     if type is None and filename.endswith(".xul"):
         return 'application/vnd.mozilla.xul+xml'
     return type or 'application/octet-stream'
-
-
-class FakeMiddleware(object):
-    entries = [
-        {'id': '20323', 'title': 'My Entry'},
-        {'id': '32736', 'title': 'Second Entry'},
-        ]
-
 
 class DebugGui(object):
 
@@ -49,9 +46,6 @@ class DebugGui(object):
             resp = exc.HTTPBadRequest(str(e))
         except exc.HTTPException, e:
             resp = e
-        except:
-            import traceback
-            print traceback.format_exc()
 
         return resp(environ, start_response)
 
@@ -64,42 +58,71 @@ class DebugGui(object):
 
         return res
 
+    def _generateFeedTagURI(self, when, pid):
+        """ See http//www.taguri.org """
+        date = time.strftime('%Y-%m-%d', time.localtime(when))
+        pid = self.middleware.pid
+        return 'tag:repoze.org,%s:%s' % (date, pid)
+
+    def _generateEntryTagURI(self, entry):
+        """ See http//www.taguri.org """
+        date = time.strftime('%Y-%m-%d', time.localtime(
+            entry['request']['begin']))
+        pid = self.middleware.pid
+        return 'tag:repoze.org,%s:%s-%s' % (date, entry['id'], pid)
+
     def getFeed(self, req):
         """Get XML representing information in the middleware"""
 
-        entries = self.middleware.entries
+        entries_xml = []
 
-        feedfmt = """<?xml version="1.0" encoding="utf-8"?>
+        for entry in self.middleware.entries:
+            request = entry['request']
+            begin = time.localtime(request['begin'])
+            entry_id = self._generateEntryTagURI(entry)
+            entry_title = '%s %s ' % (request['method'], request['url'])
+            entry_xml = entryfmt % {
+                'entry_id':entry_id,
+                'entry_title':cgi.escape(entry_title),
+                'updated':time.strftime('%Y-%m-%dT%H:%M:%SZ', begin),
+                'summary':cgi.escape(pprint.pformat(entry)),
+                }
+            entries_xml.append(entry_xml)
+
+        now = time.time()
+
+        body = feedfmt % {
+            'title':'repoze.debug feed for pid %s' % self.middleware.pid,
+            'entries':'\n'.join(entries_xml),
+            'feed_id':self._generateFeedTagURI(now, self.middleware.pid),
+            'updated':time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime(now)),
+            }
+
+        resp = Response(content_type='application/atom+xml', body=body)
+        return resp
+
+feedfmt = """\
+<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title>Example Feed</title>
+  <title>%(title)s</title>
   <link href="http://example.org/"/>
-  <updated>2003-12-13T18:30:02Z</updated>
+  <updated>%(updated)s</updated>
   <author>
-    <name>John Doe</name>
+    <name></name>
   </author>
-  <id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>
-  %s
+  <id>%(feed_id)s</id>
+  %(entries)s
 </feed>
 """
 
-        entryfmt = """  <entry>
-    <id>urn:uuid:%s</id>
-    <title>%s</title>
+entryfmt = """\
+  <entry>
+    <id>%(entry_id)s</id>
+    <title>%(entry_title)s</title>
     <link href="http://example.org/2003/12/13/atom03"/>
-    <updated>2003-12-13T18:30:02Z</updated>
-    <summary>Some text.</summary>
+    <updated>%(updated)s</updated>
+    <summary>%(summary)s</summary>
   </entry>
 """
 
-        entriesstr = ''
-        for e in entries:
-            entriesstr = entriesstr + entryfmt % (e['id'], e['title'])
-
-        body = feedfmt % entriesstr
-        content_type = "application/atom+xml"
-        resp = Response(
-            content_type=content_type,
-            body=body)
-
-        return resp

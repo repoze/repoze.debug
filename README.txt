@@ -61,14 +61,15 @@ example::
  verbose_log = %(here)s/response.log
  trace_log = %(here)s/trace.log
  # if max_bodylen is unset or is 0, it means do not limit body logging
- # default is 0
+ # default is 3KB
  max_bodylen = 3KB
  # if max_logsize is unset or is 0, it means do not limit logsize; default is
  # 100MB
  max_logsize = 100MB
  # if backup_count is 0, do not rotate the logfile.  Default is 10.
  backup_count = 10
-
+ # "keep" is the the number of entries to keep around to show in the GUI
+ keep = 100
  ...
 
  [pipeline:main]

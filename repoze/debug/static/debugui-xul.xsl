@@ -11,17 +11,16 @@ Firefox 3 XML datasources attached to XUL trees and whatnot. -->
     <xsl:template match="atom:feed" mode="tree">
         <!-- Recurse into the feed and make data to load into the tree -->
         <log>
-            <xsl:apply-templates select="atom:entry[atom:content/rz:logentry/rz:response/@tid]"
-                mode="entry"/>
+            <xsl:apply-templates select="atom:entry" mode="item"/>
+            <!--<xsl:apply-templates select="atom:entry[atom:content/rz:logentry/rz:response/@tid]"
+                mode="entry"/>-->
         </log>
     </xsl:template>
     <xsl:template match="atom:entry" mode="entry">
         <!-- The parent request is the one with a @tid on the response -->
         <entry entryid="{atom:id}" name="{atom:title}" elapsed="{atom:content/rz:logentry/@elapsed}">
             <xsl:variable name="thistid" select="atom:content/rz:logentry/rz:response/@tid"/>
-            <xsl:apply-templates select="key('getsubentry', $thistid)" mode="item"/>
-            <!-- <xsl:apply-templates
-                select="/atom:feed/atom:entry[atom:content/rz:logentry/rz:request/@tid=$thistid]" mode="item"/>-->
+            <!--<xsl:apply-templates select="key('getsubentry', $thistid)" mode="item"/>-->
         </entry>
     </xsl:template>
     <xsl:template match="atom:entry" mode="item">

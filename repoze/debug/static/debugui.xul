@@ -34,7 +34,7 @@
         <button id="reloadEntries" label="Reload"/>
     </vbox>
     <vbox flex="4">
-        <html:div id="selected-entry" flex="1">
+        <html:div id="selected-entry" style="overflow:scroll;height:600px">
             <html:h1>Yes</html:h1>
             <html:p>no</html:p>
         </html:div>

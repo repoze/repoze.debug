@@ -9,7 +9,6 @@ import pprint
 import time
 
 from webob import exc
-from webob import Request
 from webob import Response
 
 _HERE = os.path.abspath(os.path.dirname(__file__))
@@ -32,30 +31,26 @@ class DebugGui(object):
 
     def __call__(self, environ, start_response):
         """Pick apart this debug URL and return the correct response"""
+        path = environ['PATH_INFO']
 
-        # Make WebOb versions of request and response
-        req = Request(environ)
-
-        try:
-            # Process the request
-            if req.url.find(gui_flag + "/static/") > -1:
-                resp = self.getStatic(req)
-            elif req.url.find(gui_flag + "feed.xml"):
-                resp = self.getFeed(req)
-        except ValueError, e:
-            resp = exc.HTTPBadRequest(str(e))
-        except exc.HTTPException, e:
-            resp = e
+        if '/static/' in path:
+            resp = self.getStatic(path)
+        elif gui_flag + '/feed.xml' in path:
+            resp = self.getFeed()
+        else:
+            raise ValueError('No such handler for debug ui: %s', req.url)
 
         return resp(environ, start_response)
 
-    def getStatic(self, req):
+    def getStatic(self, path):
+        fn = path.split('/')[-1]
 
-        fn = req.url.split("/")[-1]
+        if not (fn in os.listdir(self.static_dir)):
+            raise ValueError('No such static file %s' % fn)
+        
         filename = os.path.join(self.static_dir, fn)
         res = Response(content_type=get_mimetype(filename))
         res.body = open(filename, 'rb').read()
-
         return res
 
     def _generateFeedTagURI(self, when, pid):
@@ -71,7 +66,7 @@ class DebugGui(object):
         pid = self.middleware.pid
         return 'tag:repoze.org,%s:%s-%s' % (date, entry['id'], pid)
 
-    def getFeed(self, req):
+    def getFeed(self):
         """Get XML representing information in the middleware"""
 
         entries_xml = []

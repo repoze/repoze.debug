@@ -1,3 +1,8 @@
+0.6 (2008/07/02)
+
+  - Fix logging bug.  Symptom: AttributeError: 'NoneType' object has
+    no attribute 'info'
+
 0.5 (2008/06/30)
 
   - Make debug request id reflect approximate UNIX time rather than a

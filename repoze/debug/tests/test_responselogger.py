@@ -38,6 +38,20 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(start_response.exc_info, None)
         self.assertEqual(app.called, True)
 
+    def test_call_nologgers(self):
+        body = ['thebody']
+        app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
+        mw = self._makeOne(app, 0, 10, None, None)
+        environ = self._makeEnviron()
+        start_response = FakeStartResponse()
+        app_iter = mw(environ, start_response)
+        self.assertEqual(''.join(list(app_iter)), 'thebody')
+        self.assertEqual(start_response.status, '200 OK')
+        self.assertEqual(len(start_response.headers), 1)
+        self.assertEqual(start_response.headers[0], ('HeaderKey','headervalue'))
+        self.assertEqual(start_response.exc_info, None)
+        self.assertEqual(app.called, True)
+
     def test_call_overmaxbodylen(self):
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])

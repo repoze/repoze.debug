@@ -168,7 +168,7 @@ class ResponseLoggingMiddleware:
         duration = response_info['end'] - request_info['begin']
         out.append('--- end RESPONSE for %s (%0.2f seconds) ---' % (
             request_id, duration))
-        self.verbose_logger.info('\n'.join(out))
+        self.verbose_logger and self.verbose_logger.info('\n'.join(out))
         info = 'E %s %s %s %s' % (self.pid, request_id, end, bodylen)
         self.trace_logger and self.trace_logger.info(info)
         

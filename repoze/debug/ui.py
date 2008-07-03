@@ -78,6 +78,14 @@ class DebugGui(object):
             entry_id = self._generateEntryTagURI(entry)
             entry_title = '%s %s ' % (request['method'], request['url'])
 
+            short_url = request['url']
+            max_url_len = 40
+            if len(short_url) > max_url_len:
+                prefix = short_url[:9]
+                suffix = short_url[-max_url_len+9:]
+                short_url = prefix + '...' + suffix
+            entry_title = '%s %s ' % (request['method'], short_url)
+
             # Make the <rz:cgi_variable> nodes into a string
             cgivars = ""
             for k,v in request['cgi_variables']:

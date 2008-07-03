@@ -1,1 +1,3 @@
-List todo items here.
+- Uncaught exceptions in the downstream application are represented in
+  the debug UI and trace log as "unfinished requests" (requests with
+  no responses).

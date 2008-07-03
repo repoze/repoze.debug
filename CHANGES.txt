@@ -1,3 +1,7 @@
+0.6.1 (2008/07/03)
+
+  - Fix debug UI bug: show escaped body regardless of content-type.
+
 0.6 (2008/07/02)
 
   - Fix logging bug.  Symptom: AttributeError: 'NoneType' object has

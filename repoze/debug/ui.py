@@ -109,26 +109,13 @@ class DebugGui(object):
                     s = header_fmt % (k, newv)
                     headers = headers + s
 
-                # If the response is text/xml, then include. If 
-                # text/html, cgi.escape and include. Otherwise, skip.
-                rh = dict(response['headers'])
-                ct = rh.get('Content-Type')
-                if ct is None:
-                    # 40x errors don't generate a content type
-                    body = ''
-                elif ct.startswith("text/xml"):
-                    body = response['body']
-                elif ct.startswith("text/html"):
-                    body = cgi.escape(response['body'])
-                else:
-                    body = ''
                 rzresponse = rzresponse_fmt % {
                     'begin': response['begin'],
                     'end': response['end'],
                     'content-length': response['content-length'],
                     'headers': headers,
                     'status': response['status'],
-                    'body': body,
+                    'body': cgi.escape(response['body']),
                     }
             else:
                 rzresponse = ''

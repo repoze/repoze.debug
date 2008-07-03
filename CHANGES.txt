@@ -1,3 +1,7 @@
+0.6.2 (2008/07/03)
+
+  - Show a "short" URL in the debug UI.
+
 0.6.1 (2008/07/03)
 
   - Fix debug UI bug: show escaped body regardless of content-type.

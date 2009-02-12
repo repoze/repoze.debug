@@ -1,3 +1,9 @@
+In next release
+
+  - Added middleware "threads" to debug threads (based on an
+    adaptation of Florent Guillaume's "DeadlockDebugger" product for
+    Zope 2).
+
 0.6.2 (2008/07/03)
 
   - Show a "short" URL in the debug UI.

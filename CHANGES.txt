@@ -1,5 +1,9 @@
 In next release
 
+  - Ignore HTTP errors in post-mortem debug middleware. The exceptions
+    we want to catch here are application-level. A configuration
+    option has been added to keep the old behavior.
+
   - Added middleware "threads" to debug threads (based on an
     adaptation of Florent Guillaume's "DeadlockDebugger" product for
     Zope 2).

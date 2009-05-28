@@ -440,6 +440,10 @@ configuration, eg.::
                  egg:repoze.debug#pdbpm
                  myapp
 
+By default, HTTP exceptions from the ``paste.httpexceptions`` are
+ignored. This may be disabled using the ``ignore_http_exceptions``
+flag (set to ``False``).
+                 
 Reporting Bugs / Development Versions
 -------------------------------------
 

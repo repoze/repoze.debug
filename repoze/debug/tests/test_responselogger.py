@@ -38,6 +38,18 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(start_response.exc_info, None)
         self.assertEqual(app.called, True)
 
+    def test_call_gui_url(self):
+        body = ['thebody']
+        app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 0, 10, vlogger, tlogger)
+        environ = self._makeEnviron()
+        environ['PATH_INFO'] = '/__repoze.debug/feed.xml'
+        environ['REQUEST_METHOD'] = 'GET'
+        start_response = FakeStartResponse()
+        app_iter = mw(environ, start_response)
+
     def test_call_nologgers(self):
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
@@ -64,6 +76,48 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(vlogger.logged), 2)
         self.failUnless('(truncated at 1 bytes)' in vlogger.logged[1])
+
+    def test_call_overkeep(self):
+        body = ['thebody']
+        app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 1, 0, vlogger, tlogger)
+        mw.entries = ['a']
+        environ = self._makeEnviron()
+        start_response = FakeStartResponse()
+        app_iter = mw(environ, start_response)
+        self.assertEqual(len(mw.entries), 1)
+
+    def test_call_start_response_not_called(self):
+        body = ['thebody']
+        app = DummyBrokenApp(body, '200 OK', [('HeaderKey', 'headervalue')])
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 1, 1, vlogger, tlogger)
+        environ = self._makeEnviron()
+        start_response = FakeStartResponse()
+        app_iter = mw(environ, start_response)
+        self.assertEqual(mw.entries[-1]['response']['status'],
+                         '500 Start Response Not Called')
+
+    def test_call_app_iter_close(self):
+        class Iterable:
+            def close(self):
+                self.closed = True
+            def __iter__(self):
+                return self
+            def next(self):
+                return 'nothing'
+        iterable = Iterable()
+        app = DummyBrokenApp(iterable, '200 OK', [('HeaderKey', 'headervalue')])
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 1, 1, vlogger, tlogger)
+        environ = self._makeEnviron()
+        start_response = FakeStartResponse()
+        app_iter = mw(environ, start_response)
+        self.assertEqual(iterable.closed, True)
 
     def test_call_contentlengthwrong(self):
         body = ['thebody']
@@ -116,7 +170,6 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.failUnless(isinstance(entry['id'], int))
 
     def test_trace_logging(self):
-        import time
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('Content-Length', '7')])
         vlogger = FakeLogger()
@@ -213,3 +266,7 @@ class DummyApp:
         self.called = True
         return self.body
     
+class DummyBrokenApp(DummyApp):
+    def __call__(self,environ, start_response):
+        self.called = True
+        return self.body

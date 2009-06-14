@@ -1,70 +1,79 @@
-In next release
+Next release
+------------
 
-  - Ignore HTTP errors in post-mortem debug middleware. The exceptions
-    we want to catch here are application-level. A configuration
-    option has been added to keep the old behavior.
+- Better test coverage.
 
-  - Added middleware "threads" to debug threads (based on an
-    adaptation of Florent Guillaume's "DeadlockDebugger" product for
-    Zope 2).
+- Ignore HTTP errors in post-mortem debug middleware. The exceptions
+  we want to catch here are application-level. A configuration option
+  has been added to keep the old behavior.
+
+- Added middleware "threads" to debug threads (based on an adaptation
+  of Florent Guillaume's "DeadlockDebugger" product for Zope 2).
 
 0.6.2 (2008/07/03)
+------------------
 
-  - Show a "short" URL in the debug UI.
+- Show a "short" URL in the debug UI.
 
 0.6.1 (2008/07/03)
+------------------
 
-  - Fix debug UI bug: show escaped body regardless of content-type.
+- Fix debug UI bug: show escaped body regardless of content-type.
 
 0.6 (2008/07/02)
+----------------
 
-  - Fix logging bug.  Symptom: AttributeError: 'NoneType' object has
-    no attribute 'info'
+- Fix logging bug.  Symptom: AttributeError: 'NoneType' object has no
+  attribute 'info'
 
 0.5 (2008/06/30)
+----------------
 
-  - Make debug request id reflect approximate UNIX time rather than a
-    random debug id.
+- Make debug request id reflect approximate UNIX time rather than a
+  random debug id.
 
-  - Deal with responses via a generator; don't unwind response bodies
-    into memory.
+- Deal with responses via a generator; don't unwind response bodies
+  into memory.
 
-  - Default max_bodysize is now 3K rather than the entire response
-    body.
+- Default max_bodysize is now 3K rather than the entire response
+  body.
 
-  - User interface; keep entries around to show in GUI.  See
-    /__repoze.debug/static/debugui.html.
+- User interface; keep entries around to show in GUI.  See
+  /__repoze.debug/static/debugui.html.
 
-  - We now write two logs: a verbose log, and a trace log.  The
-    verbose log contains information about headers, request
-    information, response bodies, etc.  The trace log is more compact
-    and is written in essence to be parsed by a tool.
+- We now write two logs: a verbose log, and a trace log.  The verbose
+  log contains information about headers, request information,
+  response bodies, etc.  The trace log is more compact and is written
+  in essence to be parsed by a tool.
 
-    The 'filename' option in Paste config is now 'verbose_log'.
+- The 'filename' option in Paste config is now 'verbose_log'.
 
-  - Port Zope's 'requestprofiler' script to WSGI.  Invoke via
-    'wsgirequestprofiler' to see help; operates against 'trace' log.
+- Port Zope's 'requestprofiler' script to WSGI.  Invoke via
+  'wsgirequestprofiler' to see help; operates against 'trace' log.
 
 0.4 (2008/06/25)
+----------------
 
-  - Add pdbpm middleware for dropping into the post-mortem debugger
-    upon an exception (copied from repoze.errorlog).
+- Add pdbpm middleware for dropping into the post-mortem debugger upon
+  an exception (copied from repoze.errorlog).
 
 0.3 (2008/06/25)
+----------------
 
-  - Add 'canary' middleware for detecting environment dictionary
-    leaks.  Add to your Paste config via 'egg:repoze.debug#canary'; it
-    takes no arguments.  If refcounts to repoze.debug.canary.Canary
-    grow without bound, you know you are leaking WSGI environment
-    dictionaries.
+- Add 'canary' middleware for detecting environment dictionary leaks.
+  Add to your Paste config via 'egg:repoze.debug#canary'; it takes no
+  arguments.  If refcounts to repoze.debug.canary.Canary grow without
+  bound, you know you are leaking WSGI environment dictionaries.
 
-  - Add source url to response logging.
+- Add source url to response logging.
 
 0.2 (2008/06/14)
+----------------
 
-  - Add warning if content-length != body length.
+- Add warning if content-length != body length.
 
 0.1 (2008/06/13)
+----------------
 
-  - Initial release.
+- Initial release.
 

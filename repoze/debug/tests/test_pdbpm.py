@@ -5,9 +5,9 @@ class TestPDBPM(unittest.TestCase):
         from repoze.debug.pdbpm import PostMortemDebug
         return PostMortemDebug
 
-    def _makeOne(self, app):
+    def _makeOne(self, app, *ignore_exc):
         f = self._getFUT()
-        return f(app)
+        return f(app, *ignore_exc)
 
     def test_post_mortem_withexc(self):
         app = DummyApplication(KeyError)
@@ -38,21 +38,35 @@ class TestPDBPM(unittest.TestCase):
         self.assertEqual(fake_pdb.called, False)
         self.assertEqual(result, ['hello world'])
 
-    def test_paste_constructor(self):
-        app = DummyApplication() 
-        from repoze.debug.pdbpm import make_middleware
-        mw = make_middleware(app, None)
+    def test_post_mortem_ignore_exc(self):
+        app = DummyApplication(KeyError)
+        mw = self._makeOne(app, KeyError)
         fake_pdb = FakePDB()
         try:
             import repoze.debug.pdbpm
             old_pdb = repoze.debug.pdbpm.pdb
             repoze.debug.pdbpm.pdb = fake_pdb
             environ = {}
-            result = mw(environ, None)
+            self.assertRaises(KeyError, mw, environ, None)
         finally:
-            repoze.debug.pdbpm.pdb = old_pdb
+            repoze.debug.pdb = old_pdb
         self.assertEqual(fake_pdb.called, False)
-        self.assertEqual(result, ['hello world'])
+
+class TestMakeMiddleware(unittest.TestCase):
+    def _callFUT(self, app, global_conf=None, ignore_http_exceptions=True):
+        from repoze.debug.pdbpm import make_middleware
+        return make_middleware(app, global_conf, ignore_http_exceptions)
+
+    def test_paste_constructor_ignore_http_exceptions(self):
+        app = DummyApplication() 
+        mw = self._callFUT(app, None)
+        self.assertEqual(mw.__name__, 'middleware')
+
+    def test_paste_constructor_ignore_http_exceptions_False(self):
+        app = DummyApplication() 
+        mw = self._callFUT(app, None, False)
+        self.assertEqual(mw.__name__, 'middleware')
+    
 
 class FakePDB:
     called = False

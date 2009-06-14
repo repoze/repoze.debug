@@ -38,7 +38,7 @@ class DebugGui(object):
         elif gui_flag + '/feed.xml' in path:
             resp = self.getFeed()
         else:
-            raise ValueError('No such handler for debug ui: %s', req.url)
+            raise ValueError('No such handler for debug ui: %s', path)
 
         return resp(environ, start_response)
 

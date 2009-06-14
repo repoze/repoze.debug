@@ -18,10 +18,10 @@ class ResponseLoggingMiddleware:
         self.entries = []
         self.lock = threading.Lock()
         self.first_request = True
-        if hasattr(os, 'getpid'):
+        if hasattr(os, 'getpid'): # pragma: no cover
             self.pid = os.getpid()
         else:
-            self.pid = 0
+            self.pid = 0 # pragma: no cover
 
     def __call__(self, environ, start_response):
         now = time.time()

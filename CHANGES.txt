@@ -1,5 +1,8 @@
-Next release
-------------
+repoze.debug Changes
+====================
+
+0.7 (2009/09/06)
+----------------
 
 - The iterator returned by an application was closed too soon when
   using the responselogger middleware, resulting in, e.g. errors from

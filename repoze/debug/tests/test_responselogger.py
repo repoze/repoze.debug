@@ -82,12 +82,24 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
         vlogger = FakeLogger()
         tlogger = FakeLogger()
-        mw = self._makeOne(app, 1, 0, vlogger, tlogger)
+        mw = self._makeOne(app, 1, 1, vlogger, tlogger)
         mw.entries = ['a']
         environ = self._makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(len(mw.entries), 1)
+
+    def test_call_keep_zero_doesnt_append_entry(self):
+        body = ['thebody']
+        app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 1, 0, vlogger, tlogger)
+        mw.entries = []
+        environ = self._makeEnviron()
+        start_response = FakeStartResponse()
+        app_iter = mw(environ, start_response)
+        self.assertEqual(len(mw.entries), 0)
 
     def test_call_start_response_not_called(self):
         body = ['thebody']

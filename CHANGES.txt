@@ -1,6 +1,10 @@
 Next release
 ------------
 
+- If the ``keep`` parameter in the "responselogger" middleware is set
+  to zero, no entries are logged (not even one, as previously may have
+  happened).
+
 - Better test coverage.
 
 - Ignore HTTP errors in post-mortem debug middleware. The exceptions

@@ -68,7 +68,10 @@ example::
  max_logsize = 100MB
  # if backup_count is 0, do not rotate the logfile.  Default is 10.
  backup_count = 10
- # "keep" is the the number of entries to keep around to show in the GUI
+ # "keep" is the the number of entries to keep around to show in the
+ # GUI. If keep is 0, no entries are kept (keeping entries around
+ # to show in the UI may be a security issue, as access to the GUI
+ # isn't authenticated)
  keep = 100
  ...
 
@@ -443,9 +446,41 @@ configuration, eg.::
 By default, HTTP exceptions from the ``paste.httpexceptions`` are
 ignored. This may be disabled using the ``ignore_http_exceptions``
 flag (set to ``False``).
-                 
+
+threads middleware
+==================
+
+The ``threads`` middleware, when put into the pipeline, allows you to
+visit a ``/debug_threads`` URL, which provides a plaintext report
+representing the state of each currently running thread in the
+process.  This is useful for debugging deadlocks.  The ``threads``
+middleware uses code from the `Deadlock Debugger
+<http://www.zope.org/Members/nuxeo/Products/DeadlockDebugger>`_
+package by Florent Guillame.
+
+Configuration via Python
+------------------------
+
+Wire up the middleware in your application::
+
+ from repoze.debug.threads import MonitoringMiddleware
+ middleware = MonitoringMiddleware(app)
+
+Configuration via Paste
+------------------------
+
+Use the 'egg:repoze.debug#threads' entry point in your Paste
+configuration, eg.::
+
+      [pipeline:main]
+      pipeline = egg:Paste#cgitb
+                 egg:repoze.debug#threads
+                 myapp
+
+The middleware accepts no configuration parameters.
+
 Reporting Bugs / Development Versions
--------------------------------------
+=====================================
 
 Visit http://bugs.repoze.org to report bugs.  Visit
 http://svn.repoze.org to download development or tagged versions.

@@ -1,5 +1,4 @@
 import thread
-import threading
 import traceback
 import time
 from cStringIO import StringIO

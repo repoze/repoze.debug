@@ -39,13 +39,14 @@ class ResponseLoggingMiddleware:
         entry['id'] = request_id
         entry['request'] = request_info
 
-        self.lock.acquire()
-        try:
-            if len(self.entries) > self.keep:
-                self.entries.pop(0)
-            self.entries.append(entry)
-        finally:
-            self.lock.release()
+        if self.keep:
+            self.lock.acquire()
+            try:
+                if len(self.entries) >= self.keep:
+                    self.entries.pop(0)
+                self.entries.append(entry)
+            finally:
+                self.lock.release()
 
         catch_response = []
         written = []
@@ -130,7 +131,7 @@ class ResponseLoggingMiddleware:
         info['content-length'] = cl
         info['status'] = status
         return info
-    
+
     def log_response(self, request_id, request_info, response_info, body):
         out = []
         begin = response_info['begin']
@@ -171,7 +172,7 @@ class ResponseLoggingMiddleware:
         self.verbose_logger and self.verbose_logger.info('\n'.join(out))
         info = 'E %s %s %s %s' % (self.pid, request_id, end, bodylen)
         self.trace_logger and self.trace_logger.info(info)
-        
+
 class SuffixMultiplier:
     # d is a dictionary of suffixes to integer multipliers.  If no suffixes
     # match, default is the multiplier.  Matches are case insensitive.  Return
@@ -226,6 +227,6 @@ def make_middleware(app,
                                         backupCount=backup_count)
         trace_log = Logger('repoze.debug.tracelogger')
         trace_log.handlers = [handler]
-    
+
     return ResponseLoggingMiddleware(app, max_bodylen, keep, verbose_log,
                                      trace_log)

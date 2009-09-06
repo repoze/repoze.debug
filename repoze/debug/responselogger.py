@@ -70,11 +70,11 @@ class ResponseLoggingMiddleware:
 
         entry['response'] = response_info
 
-        body = itertools.chain(written, app_iter)
-        body = self.log_response(request_id, request_info, response_info, body)
+        close = getattr(app_iter, 'close', None)
 
-        if hasattr(app_iter, 'close'):
-            app_iter.close()
+        body = itertools.chain(written, app_iter)
+        body = self.log_response(request_id, request_info, response_info, body,
+                                 close)
 
         return body
 
@@ -132,7 +132,7 @@ class ResponseLoggingMiddleware:
         info['status'] = status
         return info
 
-    def log_response(self, request_id, request_info, response_info, body):
+    def log_response(self, request_id, request_info, response_info, body,close):
         out = []
         begin = response_info['begin']
         t = time.ctime(begin)
@@ -172,6 +172,8 @@ class ResponseLoggingMiddleware:
         self.verbose_logger and self.verbose_logger.info('\n'.join(out))
         info = 'E %s %s %s %s' % (self.pid, request_id, end, bodylen)
         self.trace_logger and self.trace_logger.info(info)
+        if close is not None:
+            close()
 
 class SuffixMultiplier:
     # d is a dictionary of suffixes to integer multipliers.  If no suffixes

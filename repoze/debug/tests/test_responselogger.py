@@ -115,20 +115,24 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
 
     def test_call_app_iter_close(self):
         class Iterable:
+            def __init__(self, data):
+                self.data = data
             def close(self):
                 self.closed = True
             def __iter__(self):
                 return self
             def next(self):
-                return 'nothing'
-        iterable = Iterable()
+                if not self.data:
+                    raise StopIteration
+                return self.data.pop(0)
+        iterable = Iterable(['1', '2'])
         app = DummyBrokenApp(iterable, '200 OK', [('HeaderKey', 'headervalue')])
         vlogger = FakeLogger()
         tlogger = FakeLogger()
         mw = self._makeOne(app, 1, 1, vlogger, tlogger)
         environ = self._makeEnviron()
         start_response = FakeStartResponse()
-        app_iter = mw(environ, start_response)
+        app_iter = list(mw(environ, start_response))
         self.assertEqual(iterable.closed, True)
 
     def test_call_contentlengthwrong(self):

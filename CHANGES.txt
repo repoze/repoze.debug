@@ -1,6 +1,10 @@
 Next release
 ------------
 
+- The iterator returned by an application was closed too soon when
+  using the responselogger middleware, resulting in, e.g. errors from
+  paste.fileapp complaining about "file already closed".
+
 - If the ``keep`` parameter in the "responselogger" middleware is set
   to zero, no entries are logged (not even one, as previously may have
   happened).

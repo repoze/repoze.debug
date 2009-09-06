@@ -70,8 +70,5 @@ class MonitoringMiddleware(object):
             
         return response(environ, start_response)
 
-    def __del__(self):
-        self.monitor.stop()
-        
 def make_middleware(app, global_conf):
     return MonitoringMiddleware(app)

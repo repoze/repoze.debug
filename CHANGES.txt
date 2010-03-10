@@ -4,6 +4,8 @@ repoze.debug Changes
 Next Release
 ------------
 
+- Added docs.
+
 - Don't compute tracelog records unless we are going to write them.
 
 

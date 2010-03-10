@@ -1,3 +1,9 @@
-- Uncaught exceptions in the downstream application are represented in
-  the debug UI and trace log as "unfinished requests" (requests with
-  no responses).
+repoze.debug TODOs
+==================
+
+- [_] Uncaught exceptions in the downstream application are represented in
+      the debug UI and trace log as "unfinished requests" (requests with
+      no responses).
+
+- [_] Flesh out coverage of the ``repoze.debug.ui`` module (requires
+      refactoring to test semantic values, rather than rendered XML).

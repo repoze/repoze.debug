@@ -112,13 +112,16 @@ class ResponseLoggingMiddleware:
         self.lock.acquire()
         try:
             if self.first_request:
-                info = 'U %s %s %s' % (self.pid, request_id, begin)
-                self.trace_logger and self.trace_logger.info(info)
+                if self.trace_logger is not None:
+                    info = 'U %s %s %s' % (self.pid, request_id, begin)
+                    self.trace_logger.info(info)
                 self.first_request = False
         finally:
             self.lock.release()
-        info = 'B %s %s %s %s' % (self.pid, request_id, begin, method_and_url)
-        self.trace_logger and self.trace_logger.info(info)
+        if self.trace_logger is not None:
+            info = 'B %s %s %s %s' % (self.pid, request_id, begin,
+                                      method_and_url)
+            self.trace_logger.info(info)
 
     def get_response_info(self, status, headers):
         info = {}
@@ -138,8 +141,10 @@ class ResponseLoggingMiddleware:
         t = time.ctime(begin)
         status = response_info['status'].split(' ', 1)[0]
         cl = response_info['content-length']
-        info = 'A %s %s %s %s %s' % (self.pid, request_id, begin, status, cl)
-        self.trace_logger and self.trace_logger.info(info)
+        if self.trace_logger is not None:
+            info = 'A %s %s %s %s %s' % (self.pid, request_id, begin,
+                                         status, cl)
+            self.trace_logger.info(info)
         out.append('--- begin RESPONSE for %s at %s ---' % (request_id, t))
         out.append('URL: %s %s' % (request_info['method'], request_info['url']))
         out.append('Status: %s' % response_info['status'])
@@ -170,8 +175,9 @@ class ResponseLoggingMiddleware:
         out.append('--- end RESPONSE for %s (%0.2f seconds) ---' % (
             request_id, duration))
         self.verbose_logger and self.verbose_logger.info('\n'.join(out))
-        info = 'E %s %s %s %s' % (self.pid, request_id, end, bodylen)
-        self.trace_logger and self.trace_logger.info(info)
+        if self.trace_logger is not None:
+            info = 'E %s %s %s %s' % (self.pid, request_id, end, bodylen)
+            self.trace_logger.info(info)
         if close is not None:
             close()
 

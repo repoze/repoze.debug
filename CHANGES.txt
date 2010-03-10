@@ -4,7 +4,8 @@ repoze.debug Changes
 Next Release
 ------------
 
-- ...
+- Don't compute tracelog records unless we are going to write them.
+
 
 0.7 (2009/09/06)
 ----------------

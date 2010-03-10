@@ -80,7 +80,6 @@ class DebugGuiTests(unittest.TestCase):
         self.assertRaises(ValueError, gui, environ, _start_response)
 
     def test___call___w_feed_xml(self):
-        from repoze.bfg.testing import DummyModel
         environ = self._makeEnviron(PATH_INFO='/__repoze.debug/feed.xml')
         _started, _start_response = self._make_start_response()
         mw = DummyModel(entries=[], pid=1234)
@@ -109,7 +108,6 @@ class DebugGuiTests(unittest.TestCase):
 
     def test_getFeed_empty(self):
         from webob import Response
-        from repoze.bfg.testing import DummyModel
         mw = DummyModel(entries=[], pid=1234)
         gui = self._makeOne(mw)
         response = gui.getFeed()
@@ -119,7 +117,6 @@ class DebugGuiTests(unittest.TestCase):
 
     def test_getFeed_non_empty_no_response(self):
         from webob import Response
-        from repoze.bfg.testing import DummyModel
         entries = [
             {'id': 'aaaa',
              'request': {
@@ -141,7 +138,6 @@ class DebugGuiTests(unittest.TestCase):
 
     def test_getFeed_non_empty_no_response_long_url(self):
         from webob import Response
-        from repoze.bfg.testing import DummyModel
         entries = [
             {'id': 'aaaa',
              'request': {
@@ -163,7 +159,6 @@ class DebugGuiTests(unittest.TestCase):
 
     def test_getFeed_non_empty_w_response(self):
         from webob import Response
-        from repoze.bfg.testing import DummyModel
         entries = [
             {'id': 'aaaa',
              'request': {
@@ -189,3 +184,7 @@ class DebugGuiTests(unittest.TestCase):
         self.failUnless(isinstance(response, Response))
         self.assertEqual(response.content_type, 'application/atom+xml')
         # XXX need more assertions?  Damn trying to test rendered output!
+
+class DummyModel:
+    def __init__(self, **kw):
+        self.__dict__.update(kw)

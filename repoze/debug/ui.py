@@ -1,14 +1,12 @@
 """GUI for presenting ways to look at the repoze.debug data
 
 """
-
 import cgi
 import mimetypes
 import os
 import pprint
 import time
 
-from webob import exc
 from webob import Response
 
 _HERE = os.path.abspath(os.path.dirname(__file__))
@@ -20,7 +18,7 @@ def is_gui_url(environ):
 def get_mimetype(filename):
     type, encoding = mimetypes.guess_type(filename)
     if type is None and filename.endswith(".xul"):
-        return 'application/vnd.mozilla.xul+xml'
+        return 'application/vnd.mozilla.xul+xml' #pragma NO COVER
     return type or 'application/octet-stream'
 
 class DebugGui(object):

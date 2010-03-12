@@ -12,7 +12,9 @@ package by Florent Guillame.
 Configuration via Python
 ------------------------
 
-Wire up the middleware in your application::
+Wire up the middleware in your application:
+
+.. code-block:: python
 
  from repoze.debug.threads import MonitoringMiddleware
  middleware = MonitoringMiddleware(app)
@@ -21,7 +23,9 @@ Configuration via Paste
 ------------------------
 
 Use the 'egg:repoze.debug#threads' entry point in your Paste
-configuration, eg.::
+configuration, e.g.:
+
+.. code-block:: ini
 
       [pipeline:main]
       pipeline = egg:Paste#cgitb

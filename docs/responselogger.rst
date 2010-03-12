@@ -29,7 +29,9 @@ The trace log is meant to be processed by the :ref:`wsgirequestprofiler`
 Configuration via Python
 ------------------------
 
-To wire up the middleware in your application in imperative Python code::
+To wire up the middleware in your application in imperative Python code:
+
+.. code-block:: python
 
  from repoze.debug.responselogger import ResponseLoggingMiddleware
  from logging import getLogger
@@ -57,7 +59,9 @@ Configuration via Paste
 -----------------------
 
 Wire the middleware into a pipeline in your Paste configuration, for
-example::
+example:
+
+.. code-block:: ini
 
  [filter:responselogger]
  use = egg:repoze.debug#responselogger
@@ -221,8 +225,11 @@ with the --help flag for more information.
 wsgirequestprofiler script
 --------------------------
 
-Usage::
-   bin/wsgirequestprofiler filename1 [filename2 ...]
+Usage:
+
+.. code-block:: sh
+
+   $ bin/wsgirequestprofiler filename1 [filename2 ...]
           [--cumulative | --detailed | [--timed --resolution=seconds]]
           [--sort=spec]
           [--top=n]

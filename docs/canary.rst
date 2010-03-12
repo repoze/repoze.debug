@@ -7,7 +7,9 @@ is leaking WSGI environment dictionary objects.
 Configuration via Python
 ------------------------
 
-Wire up the middleware in your application::
+Wire up the middleware in your application:
+
+.. code-block:: python
 
  from repoze.debug.canary import CanaryMiddleware
  middleware = CanaryMiddleware(app)
@@ -15,7 +17,9 @@ Wire up the middleware in your application::
 Configuration via Paste
 -----------------------
 
-Wire the canary middleware up into your pipeline::
+Wire the canary middleware up into your pipeline:
+
+.. code-block:: ini
 
  [pipeline:main]
  pipeline = egg:Paste#cgitb

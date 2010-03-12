@@ -10,7 +10,9 @@ you to debug the error.
 Configuration via Python
 ------------------------
 
-Wire up the middleware in your application::
+Wire up the middleware in your application:
+
+.. code-block:: python
 
  from repoze.debug.pdbpm import PostMortemDebug
  middleware = PostMortemDebug(app)
@@ -20,7 +22,9 @@ Configuration via Paste
 ------------------------
 
 Use the 'egg:repoze.debug#pdbpm' entry point in your Paste
-configuration, eg.::
+configuration, e.g.:
+
+.. code-block:: ini
 
       [pipeline:main]
       pipeline = egg:Paste#cgitb

@@ -1,10 +1,10 @@
 repoze.debug Changes
 ====================
 
-Next Release
-------------
+0.7.1 (2010-03-11)
+------------------
 
-- Added docs.
+- Sphinxified docs.
 
 - Don't compute tracelog records unless we are going to write them.
 

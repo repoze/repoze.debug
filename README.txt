@@ -28,17 +28,13 @@ Reporting Bugs
 
 Please report bugs in this package to
 
-  http://bugs.repoze.org
+  https://github.com/repoze/repoze.debug/issues
 
 
-Checking Out a Development Version
------------------------------------
+Obtaining Source Code
+---------------------
 
-Download development or tagged versions of the software using
-subversion, pointed at the read-only HTTP repository:
+Download development or tagged versions of the software by visiting:
 
-  http://svn.repoze.org/repoze.debug/
+  https://github.com/repoze/repoze.debug
 
-E.g., to get a read-only checkout of the trunk::
-
-  $ svn co http://svn.repoze.org/repoze.debug/trunk repoze.debug-trunk

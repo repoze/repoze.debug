@@ -71,7 +71,11 @@ class MonitoringMiddleware(object):
         if request.path == '/debug_threads':
             response = webob.Response(request=request)
             response.content_type = 'text/plain'
-            response.body = dump_threads()
+            t = dump_threads()
+            if isinstance(t, unicode):
+                response.unicode_body = t
+            else:
+                response.body = t
         else:
             response = request.get_response(self.app, catch_exc_info=True)
             

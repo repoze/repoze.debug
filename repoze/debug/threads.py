@@ -3,7 +3,14 @@ import traceback
 import time
 from cStringIO import StringIO
 
-import threadframe
+try:
+    # Available from Python >= 2.5
+    from sys import _current_frames as threadframe
+except ImportError:
+    import threadframe as _threadframe
+    # Wrapper to provide the same interface as the one from Python >= 2.5
+    threadframe = lambda: _threadframe.dict()
+
 import webob
 
 def dump_threads():
@@ -12,7 +19,7 @@ def dump_threads():
     Returns a string with the tracebacks.
     """
 
-    frames = threadframe.dict()
+    frames = threadframe()
     this_thread_id = thread.get_ident()
     now = time.strftime("%Y-%m-%d %H:%M:%S")
     res = ["Threads traceback dump at %s\n" % now]

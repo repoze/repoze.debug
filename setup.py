@@ -18,6 +18,15 @@ import os
 
 from setuptools import setup, find_packages
 
+requires = []
+try:
+    # Available from Python >= 2.5
+    from sys import _current_frames
+except ImportError:
+    # Otherwise, depend on threadframe, which provide the same functionality as
+    # the function in Python >= 2.5
+    requires.append('threadframe')
+
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
@@ -51,8 +60,7 @@ setup(name='repoze.debug',
       install_requires = [
                'Paste',
                'WebOb',
-               'threadframe',
-               ],
+               ] + requires,
       test_suite="repoze.debug.tests",
       entry_points = """\
         [paste.filter_app_factory]

@@ -1,6 +1,16 @@
 repoze.debug Changes
 ====================
 
+Unreleased
+----------
+
+- Don't require 'threadframe' module in Python >= 2.5 (thanks, Jonathan
+  Ballet).  Closes http://bugs.repoze.org/issue162.
+
+- Don't crash if unicode values are present in threads' state (thanks,
+  Jonathan Ballet).  Closes http://bugs.repoze.org/issue162.
+
+
 0.7.1 (2010-03-11)
 ------------------
 

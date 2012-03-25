@@ -1,6 +1,14 @@
 repoze.debug Changes
 ====================
 
+After 0.7.2
+-----------
+
+- Added support for continuous integration using ``tox`` and ``jenkins``.
+
+- Added 'setup.py dev' alias (runs ``setup.py develop`` plus installs
+  ``nose`` and ``coverage``).
+
 0.7.2 (2011-04-18)
 ------------------
 

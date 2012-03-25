@@ -15,10 +15,19 @@
 __version__ = '0.7.2'
 
 import os
+import sys
 
 from setuptools import setup, find_packages
 
-requires = []
+if sys.version_info >= (2, 6):
+    requires = ['Paste',
+                'WebOb',
+               ]
+else:
+    requires = ['Paste',
+                'WebOb<1.1dev',
+               ]
+
 try:
     # Available from Python >= 2.5
     from sys import _current_frames
@@ -30,6 +39,8 @@ except ImportError:
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
+
+testing_extras = ['nose', 'coverage']
 
 setup(name='repoze.debug',
       version=__version__,
@@ -53,14 +64,8 @@ setup(name='repoze.debug',
       include_package_data=True,
       namespace_packages=['repoze'],
       zip_safe=False,
-      tests_require = [
-               'Paste',
-               'WebOb',
-               ],
-      install_requires = [
-               'Paste',
-               'WebOb',
-               ] + requires,
+      tests_require = requires,
+      install_requires = requires,
       test_suite="repoze.debug.tests",
       entry_points = """\
         [paste.filter_app_factory]
@@ -70,6 +75,9 @@ setup(name='repoze.debug',
         threads = repoze.debug.threads:make_middleware
         [console_scripts]
         wsgirequestprofiler = repoze.debug.scripts.requestprofiler:main
-      """
-      )
+      """,
+      extras_require = {
+        'testing':  requires + testing_extras,
+      }
+)
 

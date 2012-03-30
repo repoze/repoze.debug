@@ -849,14 +849,14 @@ def main():
         analyze(req, top, sortf, start, end, mode, resolution, urlfocusurl,
                 urlfocustime, verbose)
 
-    except AssertionError, val:
+    except AssertionError as val:
         a = "%s is not a valid %s sort spec, use one of %s"
         print a % (val[0], val[1], val[2])
         sys.exit(0)
-    except getopt.error, val:
+    except getopt.error as val:
         print val
         sys.exit(0)
-    except ProfileException, val:
+    except ProfileException as val:
         print val
         sys.exit(0)
     except SystemExit:

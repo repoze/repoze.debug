@@ -20,10 +20,8 @@ try:
     import gzip
 except:
     gzip = None
-import math
 import sys
 import time
-from types import StringType
 
 class ProfileException(Exception):
     pass

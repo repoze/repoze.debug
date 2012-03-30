@@ -12,29 +12,14 @@
 #
 ##############################################################################
 
-__version__ = '0.7.3'
+__version__ = '0.8dev'
 
 import os
-import sys
 
 from setuptools import setup, find_packages
 
-if sys.version_info >= (2, 6):
-    requires = ['Paste',
-                'WebOb',
-               ]
-else:
-    requires = ['Paste',
-                'WebOb<1.1dev',
-               ]
+requires = ['Paste', 'WebOb']
 
-try:
-    # Available from Python >= 2.5
-    from sys import _current_frames
-except ImportError:
-    # Otherwise, depend on threadframe, which provide the same functionality as
-    # the function in Python >= 2.5
-    requires.append('threadframe')
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.txt')).read()
@@ -50,8 +35,6 @@ setup(name='repoze.debug',
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.4",
-        "Programming Language :: Python :: 2.5",
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: Implementation :: CPython",

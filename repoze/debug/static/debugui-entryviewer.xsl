@@ -60,6 +60,14 @@
                             </span>
                         </div>
                     </xsl:for-each>
+
+                    <h3>Body</h3>
+                    <div>
+                        <span class="entry-value">
+                            <xsl:value-of select="rz:body"/>
+                        </span>
+                    </div>
+
                 </xsl:for-each>
             </div>
 

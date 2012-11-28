@@ -17,6 +17,8 @@
             <h1>
                 <xsl:value-of select="atom:title"/>
             </h1>
+
+            <hr/>
             <h2>Request</h2>
             <div>
                 <xsl:for-each select="atom:content/rz:logentry/rz:request">
@@ -38,6 +40,8 @@
                             <xsl:value-of select="rz:url"/>
                         </span>
                     </div>
+
+                    <h3>CGI variables</h3>
                     <xsl:for-each select="rz:cgi_variable">
                         <div>
                             <strong><xsl:value-of select="@name"/>:</strong>
@@ -46,6 +50,8 @@
                             </span>
                         </div>
                     </xsl:for-each>
+
+                    <h3>WSGI variables</h3>
                     <xsl:for-each select="rz:wsgi_variable">
                         <div>
                             <strong><xsl:value-of select="@name"/>:</strong>
@@ -56,6 +62,8 @@
                     </xsl:for-each>
                 </xsl:for-each>
             </div>
+
+            <hr/>
             <h2>Response</h2>
             <xsl:choose>
                 <xsl:when test="atom:content/rz:logentry/rz:response">
@@ -85,6 +93,8 @@
                                     <xsl:value-of select="rz:content-length"/>
                                 </span>
                             </div>
+
+                            <h3>Headers</h3>
                             <xsl:for-each select="rz:header">
                                 <div>
                                     <strong><xsl:value-of select="@name"/>:</strong>
@@ -93,12 +103,14 @@
                                     </span>
                                 </div>
                             </xsl:for-each>
+
+                            <h3>Body</h3>
                             <div>
-                                <strong>Body:</strong>
                                 <span class="entry-value">
                                     <xsl:value-of select="rz:body"/>
                                 </span>
                             </div>
+
                         </xsl:for-each>
                     </div>
                 </xsl:when>

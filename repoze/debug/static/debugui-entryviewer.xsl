@@ -46,7 +46,7 @@
                             </span>
                         </div>
                     </xsl:for-each>
-                    <xsl:for-each select="rz:wgi_variable">
+                    <xsl:for-each select="rz:wsgi_variable">
                         <div>
                             <strong><xsl:value-of select="@name"/>:</strong>
                             <span class="entry-value">
@@ -85,7 +85,7 @@
                                     <xsl:value-of select="rz:content-length"/>
                                 </span>
                             </div>
-                            <xsl:for-each select="header">
+                            <xsl:for-each select="rz:header">
                                 <div>
                                     <strong><xsl:value-of select="@name"/>:</strong>
                                     <span class="entry-value">

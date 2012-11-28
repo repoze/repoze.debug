@@ -1,4 +1,5 @@
 import unittest
+import StringIO
 
 class TestResponseLoggingMiddleware(unittest.TestCase):
     def _getTargetClass(self):
@@ -18,6 +19,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
             'wsgi.multithread':True,
             'wsgi.run_once':False,
             'wsgi.url_scheme':'http',
+            'wsgi.input':StringIO.StringIO('hello world'),
             }
         return environ
 
@@ -180,6 +182,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(entry['response']['headers'],
                          [('Content-Length', '1')])
         self.assertEqual(entry['request']['url'], 'http://localhost')
+        self.assertEqual(entry['request']['body'], 'hello world')
         self.assertEqual(entry['response']['content-length'], 1)
         self.assertEqual(len(entry['request']['cgi_variables']), 2)
         self.assertEqual(len(entry['request']['wsgi_variables']), 2)

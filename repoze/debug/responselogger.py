@@ -4,8 +4,6 @@ import time
 import threading
 import urllib
 
-#from paste.exceptions.errormiddleware import Supplement
-#from paste.response import header_value
 from repoze.debug.ui import is_gui_url
 from repoze.debug.ui import DebugGui
 
@@ -206,7 +204,7 @@ class SuffixMultiplier:
 
 byte_size = SuffixMultiplier({'kb': 1024,
                               'mb': 1024*1024,
-                              'gb': 1024*1024*1024L,})
+                              'gb': 1024*1024*1024,})
 
 def make_middleware(app,
                     global_conf,

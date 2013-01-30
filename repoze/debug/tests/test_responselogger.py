@@ -261,6 +261,8 @@ class TestMakeResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(len(mw.trace_logger.handlers), 1)
         self.assertEqual(mw.max_bodylen, 0)
         self.assertEqual(mw.keep, 0)
+        mw.verbose_logger.handlers[0].close()
+        mw.trace_logger.handlers[0].close()
 
 class FakeStartResponse:
     def __call__(self, status, headers, exc_info=None):

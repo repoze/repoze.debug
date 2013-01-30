@@ -10,7 +10,7 @@ except: #pragma NO COVER Py3k
 from repoze.debug.ui import is_gui_url
 from repoze.debug.ui import DebugGui
 
-class ResponseLoggingMiddleware:
+class ResponseLoggingMiddleware(object):
     def __init__(self, app, max_bodylen, keep, verbose_logger, trace_logger):
         self.application = app
         self.max_bodylen = max_bodylen

@@ -2,7 +2,10 @@ import itertools
 import os
 import time
 import threading
-import urllib
+try:
+    from urllib import quote
+except: #pragma NO COVER Py3k
+    from urllib.parse import quote
 
 from repoze.debug.ui import is_gui_url
 from repoze.debug.ui import DebugGui
@@ -224,14 +227,14 @@ def make_middleware(app,
     from logging.handlers import RotatingFileHandler
 
     if verbose_log:
-        handler = RotatingFileHandler(verbose_log, maxBytes=max_logsize,
-                                        backupCount=backup_count)
+        handler = RotatingFileHandler(verbose_log, maxBytes=max_bytes,
+                                      backupCount=backup_count)
         verbose_log = Logger('repoze.debug.verboselogger')
         verbose_log.handlers = [handler]
 
     if trace_log:
-        handler = RotatingFileHandler(trace_log, maxBytes=max_logsize,
-                                        backupCount=backup_count)
+        handler = RotatingFileHandler(trace_log, maxBytes=max_bytes,
+                                      backupCount=backup_count)
         trace_log = Logger('repoze.debug.tracelogger')
         trace_log.handlers = [handler]
 
@@ -321,8 +324,8 @@ def construct_url(environ):
             if environ['SERVER_PORT'] != '80':
                 url += ':' + environ['SERVER_PORT']
 
-    url += urllib.quote(environ.get('SCRIPT_NAME',''))
-    url += urllib.quote(environ.get('PATH_INFO',''))
+    url += quote(environ.get('SCRIPT_NAME',''))
+    url += quote(environ.get('PATH_INFO',''))
     if environ.get('QUERY_STRING'):
         url += '?' + environ['QUERY_STRING']
     return url

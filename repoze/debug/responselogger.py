@@ -25,16 +25,21 @@ class ResponseLoggingMiddleware:
         else:
             self.pid = 0 # pragma: no cover
 
-    def __call__(self, environ, start_response):
-        now = time.time()
+    _now = None
+    @property
+    def now(self):
+        if self._now is None:
+            return time.time()
+        return self._now
 
+    def __call__(self, environ, start_response):
         if is_gui_url(environ):
             gui = DebugGui(self)
             return gui(environ, start_response)
 
         request_id = id(environ)
         request_info = self.get_request_info(environ)
-        request_info['begin'] = now
+        request_info['begin'] = self.now
         self.log_request_begin(request_id, request_info)
 
         entry = {}
@@ -59,7 +64,7 @@ class ResponseLoggingMiddleware:
             return written.append
 
         app_iter = self.application(environ, replace_start_response)
-        received_response = time.time()
+        received_response = self.now
 
         if catch_response:
             status, headers = catch_response[0]
@@ -172,7 +177,7 @@ class ResponseLoggingMiddleware:
                     'WARNING-1: bodylen (%s) != Content-Length '
                     'header value (%s)' % (bodylen, cl))
         response_info['body'] = bodyout
-        end = response_info['end'] = time.time()
+        end = response_info['end'] = self.now
         duration = response_info['end'] - request_info['begin']
         out.append('--- end RESPONSE for %s (%0.2f seconds) ---' % (
             request_id, duration))

@@ -114,7 +114,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
                          '500 Start Response Not Called')
 
     def test_call_app_iter_close(self):
-        class Iterable:
+        class Iterable(object):
             def __init__(self, data):
                 self.data = data
             def close(self):
@@ -125,6 +125,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
                 if not self.data:
                     raise StopIteration
                 return self.data.pop(0)
+            __next__ = next
         iterable = Iterable(['1', '2'])
         app = DummyBrokenApp(iterable, '200 OK', [('HeaderKey', 'headervalue')])
         vlogger = FakeLogger()
@@ -186,6 +187,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.failUnless(isinstance(entry['id'], int))
 
     def test_trace_logging(self):
+        import time
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('Content-Length', '7')])
         vlogger = FakeLogger()
@@ -194,6 +196,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         start_response = FakeStartResponse()
         environ = self._makeEnviron()
         mw.pid = 0
+        mw._now = now = time.time()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(tlogger.logged), 4)
@@ -201,6 +204,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         entry = mw.entries[0]
         rid = entry['id']
         begin = entry['request']['begin']
+        self.assertEqual(begin, now)
         
         result = logged[0].split(' ', 4)
         self.assertEqual(result[0], 'U')

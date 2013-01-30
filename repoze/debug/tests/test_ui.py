@@ -70,7 +70,7 @@ class DebugGuiTests(unittest.TestCase):
         headers = _started[0][1]
         self.failUnless(('Content-Type', 'text/html; charset=UTF-8')
                             in headers)
-        self.failUnless('<html' in ''.join(list(app_iter)))
+        self.failUnless(b'<html' in b''.join(list(app_iter)))
         # XXX need more assertions?  Damn trying to test rendered output!
 
     def test___call___unknown(self):
@@ -90,7 +90,7 @@ class DebugGuiTests(unittest.TestCase):
         headers = _started[0][1]
         self.failUnless(('Content-Type', 'application/atom+xml; charset=UTF-8')
                             in headers)
-        self.failUnless('<atom:feed' in ''.join(list(app_iter)))
+        self.failUnless(b'<atom:feed' in b''.join(list(app_iter)))
         # XXX need more assertions?  Damn trying to test rendered output!
 
     def test_getStatic_miss(self):

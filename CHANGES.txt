@@ -1,8 +1,8 @@
 repoze.debug Changes
 ====================
 
-Next release
-------------
+1.0b1 (2013-01-30)
+------------------
 
 - Add support for bulding docs and testing doctest snippets under ``tox``.
 

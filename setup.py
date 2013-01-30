@@ -18,7 +18,7 @@ import os
 
 from setuptools import setup, find_packages
 
-requires = ['Paste', 'WebOb']
+requires = ['WebOb']
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -35,6 +35,7 @@ setup(name='repoze.debug',
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: Implementation :: CPython",

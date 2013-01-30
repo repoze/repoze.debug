@@ -2,9 +2,10 @@ import itertools
 import os
 import time
 import threading
+import urllib
 
-from paste.exceptions.errormiddleware import Supplement
-from paste.response import header_value
+#from paste.exceptions.errormiddleware import Supplement
+#from paste.response import header_value
 from repoze.debug.ui import is_gui_url
 from repoze.debug.ui import DebugGui
 
@@ -238,3 +239,118 @@ def make_middleware(app,
 
     return ResponseLoggingMiddleware(app, max_bodylen, keep, verbose_log,
                                      trace_log)
+
+
+class Supplement(object):
+    """ Display standard WSGI information in the traceback.
+
+    Forked from 'Paste 1.7.5.1 to get Py3k compatibility.
+    """
+    def __init__(self, middleware, environ):
+        self.middleware = middleware
+        self.environ = environ
+        self.source_url = construct_url(environ)
+
+    def extraData(self):
+        data = {}
+        cgi_vars = data[('extra', 'CGI Variables')] = {}
+        wsgi_vars = data[('extra', 'WSGI Variables')] = {}
+        hide_vars = ['paste.config', 'wsgi.errors', 'wsgi.input',
+                     'wsgi.multithread', 'wsgi.multiprocess',
+                     'wsgi.run_once', 'wsgi.version',
+                     'wsgi.url_scheme']
+        for name, value in self.environ.items():
+            if name.upper() == name:
+                if value:
+                    cgi_vars[name] = value
+            elif name not in hide_vars:
+                wsgi_vars[name] = value
+        if self.environ['wsgi.version'] != (1, 0):
+            wsgi_vars['wsgi.version'] = self.environ['wsgi.version']
+        proc_desc = tuple([int(bool(self.environ[key]))
+                           for key in ('wsgi.multiprocess',
+                                       'wsgi.multithread',
+                                       'wsgi.run_once')])
+        wsgi_vars['wsgi process'] = self.process_combos[proc_desc]
+        wsgi_vars['application'] = self.middleware.application
+        p_conf = self.environ.get('paste.config')
+        if p_conf is not None:
+            data[('extra', 'Configuration')] = dict(p_conf)
+        return data
+
+    process_combos = {
+        # multiprocess, multithread, run_once
+        (0, 0, 0): 'Non-concurrent server',
+        (0, 1, 0): 'Multithreaded',
+        (1, 0, 0): 'Multiprocess',
+        (1, 1, 0): 'Multi process AND threads (?)',
+        (0, 0, 1): 'Non-concurrent CGI',
+        (0, 1, 1): 'Multithread CGI (?)',
+        (1, 0, 1): 'CGI',
+        (1, 1, 1): 'Multi thread/process CGI (?)',
+        }
+
+def construct_url(environ):
+    """Reconstruct the URL from the WSGI environment.
+
+    You may override SCRIPT_NAME, PATH_INFO, and QUERYSTRING with
+    the keyword arguments.
+
+    Forked from 'Paste 1.7.5.1 to get Py3k compatibility.
+    """
+    url = environ['wsgi.url_scheme'] + '://'
+
+    if environ.get('HTTP_HOST'):
+        host = environ['HTTP_HOST']
+        port = None
+        if ':' in host:
+            host, port = host.split(':', 1)
+            if environ['wsgi.url_scheme'] == 'https':
+                if port == '443':
+                    port = None
+            elif environ['wsgi.url_scheme'] == 'http':
+                if port == '80':
+                    port = None
+        url += host
+        if port:
+            url += ':%s' % port
+    else:
+        url += environ['SERVER_NAME']
+        if environ['wsgi.url_scheme'] == 'https':
+            if environ['SERVER_PORT'] != '443':
+                url += ':' + environ['SERVER_PORT']
+        else:
+            if environ['SERVER_PORT'] != '80':
+                url += ':' + environ['SERVER_PORT']
+
+    url += urllib.quote(environ.get('SCRIPT_NAME',''))
+    url += urllib.quote(environ.get('PATH_INFO',''))
+    if environ.get('QUERY_STRING'):
+        url += '?' + environ['QUERY_STRING']
+    return url
+
+def header_value(headers, name):
+    """Return the header's value, or None if no such header.
+
+    If a header appears more than once, all the values of the headers
+    are joined with ','.   Note that this is consistent /w RFC 2616
+    section 4.2 which states:
+
+        It MUST be possible to combine the multiple header fields
+        into one "field-name: field-value" pair, without changing
+        the semantics of the message, by appending each subsequent
+        field-value to the first, each separated by a comma.
+
+    However, note that the original netscape usage of 'Set-Cookie',
+    especially in MSIE which contains an 'expires' date will is not
+    compatible with this particular concatination method.
+
+    Forked from 'Paste 1.7.5.1 to get Py3k compatibility.
+    """
+    name = name.lower()
+    result = [value for header, value in headers
+              if header.lower() == name]
+    if result:
+        return ','.join(result)
+    else:
+        return None

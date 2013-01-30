@@ -27,6 +27,8 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 testing_extras = ['nose', 'coverage']
 
+docs_extras = ['Sphinx']
+
 setup(name='repoze.debug',
       version=__version__,
       description='Forensic debugging WSGI middleware',
@@ -71,6 +73,7 @@ setup(name='repoze.debug',
       """,
       extras_require = {
         'testing':  requires + testing_extras,
+        'docs':  requires + docs_extras,
       }
 )
 

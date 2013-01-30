@@ -7,13 +7,13 @@ class Test_is_gui_url(unittest.TestCase):
         return is_gui_url(environ)
 
     def test_no_PATH_INFO(self):
-        self.failIf(self._callFUT({}))
+        self.assertFalse(self._callFUT({}))
 
     def test_w_PATH_INFO_not_gui_flag(self):
-        self.failIf(self._callFUT({'PATH_INFO': 'something'}))
+        self.assertFalse(self._callFUT({'PATH_INFO': 'something'}))
 
     def test_w_PATH_INFO_w_gui_flag(self):
-        self.failUnless(self._callFUT({'PATH_INFO': '__repoze.debug/foo'}))
+        self.assertTrue(self._callFUT({'PATH_INFO': '__repoze.debug/foo'}))
 
 class Test_get_mimetype(unittest.TestCase):
 
@@ -68,9 +68,9 @@ class DebugGuiTests(unittest.TestCase):
         self.assertEqual(len(_started), 1)
         self.assertEqual(_started[0][0], '200 OK')
         headers = _started[0][1]
-        self.failUnless(('Content-Type', 'text/html; charset=UTF-8')
+        self.assertTrue(('Content-Type', 'text/html; charset=UTF-8')
                             in headers)
-        self.failUnless(b'<html' in b''.join(list(app_iter)))
+        self.assertTrue(b'<html' in b''.join(list(app_iter)))
         # XXX need more assertions?  Damn trying to test rendered output!
 
     def test___call___unknown(self):
@@ -88,9 +88,9 @@ class DebugGuiTests(unittest.TestCase):
         self.assertEqual(len(_started), 1)
         self.assertEqual(_started[0][0], '200 OK')
         headers = _started[0][1]
-        self.failUnless(('Content-Type', 'application/atom+xml; charset=UTF-8')
+        self.assertTrue(('Content-Type', 'application/atom+xml; charset=UTF-8')
                             in headers)
-        self.failUnless(b'<atom:feed' in b''.join(list(app_iter)))
+        self.assertTrue(b'<atom:feed' in b''.join(list(app_iter)))
         # XXX need more assertions?  Damn trying to test rendered output!
 
     def test_getStatic_miss(self):
@@ -101,7 +101,7 @@ class DebugGuiTests(unittest.TestCase):
         from webob import Response
         gui = self._makeOne(None)
         response = gui.getStatic('debugui.html')
-        self.failUnless(isinstance(response, Response))
+        self.assertTrue(isinstance(response, Response))
         self.assertEqual(response.content_type, 'text/html')
         self.assertEqual(response.charset, 'UTF-8')
         # XXX need more assertions?  Damn trying to test rendered output!
@@ -111,7 +111,7 @@ class DebugGuiTests(unittest.TestCase):
         mw = DummyModel(entries=[], pid=1234)
         gui = self._makeOne(mw)
         response = gui.getFeed()
-        self.failUnless(isinstance(response, Response))
+        self.assertTrue(isinstance(response, Response))
         self.assertEqual(response.content_type, 'application/atom+xml')
         # XXX need more assertions?  Damn trying to test rendered output!
 
@@ -132,7 +132,7 @@ class DebugGuiTests(unittest.TestCase):
         mw = DummyModel(entries=entries, pid=1234)
         gui = self._makeOne(mw)
         response = gui.getFeed()
-        self.failUnless(isinstance(response, Response))
+        self.assertTrue(isinstance(response, Response))
         self.assertEqual(response.content_type, 'application/atom+xml')
         # XXX need more assertions?  Damn trying to test rendered output!
 
@@ -153,7 +153,7 @@ class DebugGuiTests(unittest.TestCase):
         mw = DummyModel(entries=entries, pid=1234)
         gui = self._makeOne(mw)
         response = gui.getFeed()
-        self.failUnless(isinstance(response, Response))
+        self.assertTrue(isinstance(response, Response))
         self.assertEqual(response.content_type, 'application/atom+xml')
         # XXX need more assertions?  Damn trying to test rendered output!
 
@@ -181,7 +181,7 @@ class DebugGuiTests(unittest.TestCase):
         mw = DummyModel(entries=entries, pid=1234)
         gui = self._makeOne(mw)
         response = gui.getFeed()
-        self.failUnless(isinstance(response, Response))
+        self.assertTrue(isinstance(response, Response))
         self.assertEqual(response.content_type, 'application/atom+xml')
         # XXX need more assertions?  Damn trying to test rendered output!
 

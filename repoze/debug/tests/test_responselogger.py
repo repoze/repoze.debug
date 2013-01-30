@@ -75,7 +75,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(vlogger.logged), 2)
-        self.failUnless('(truncated at 1 bytes)' in vlogger.logged[1])
+        self.assertTrue('(truncated at 1 bytes)' in vlogger.logged[1])
 
     def test_call_overkeep(self):
         body = ['thebody']
@@ -147,7 +147,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(vlogger.logged), 2)
-        self.failUnless('WARNING-1' in vlogger.logged[1])
+        self.assertTrue('WARNING-1' in vlogger.logged[1])
 
     def test_call_sourceurl_in_response(self):
         body = ['thebody']
@@ -160,7 +160,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(vlogger.logged), 2)
-        self.failUnless('URL: GET http://localhost' in vlogger.logged[1])
+        self.assertTrue('URL: GET http://localhost' in vlogger.logged[1])
 
     def test_entry_created(self):
         body = ['thebody']
@@ -175,16 +175,16 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(len(mw.entries), 1)
         entry = mw.entries[0]
         self.assertEqual(entry['response']['status'], '200 OK')
-        self.failUnless(isinstance(entry['request']['begin'], float))
-        self.failUnless(isinstance(entry['response']['begin'], float))
-        self.failUnless(isinstance(entry['response']['end'], float))
+        self.assertTrue(isinstance(entry['request']['begin'], float))
+        self.assertTrue(isinstance(entry['response']['begin'], float))
+        self.assertTrue(isinstance(entry['response']['end'], float))
         self.assertEqual(entry['response']['headers'],
                          [('Content-Length', '1')])
         self.assertEqual(entry['request']['url'], 'http://localhost')
         self.assertEqual(entry['response']['content-length'], 1)
         self.assertEqual(len(entry['request']['cgi_variables']), 2)
         self.assertEqual(len(entry['request']['wsgi_variables']), 2)
-        self.failUnless(isinstance(entry['id'], int))
+        self.assertTrue(isinstance(entry['id'], int))
 
     def test_trace_logging(self):
         import time

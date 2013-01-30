@@ -4,6 +4,8 @@ repoze.debug Changes
 Next release
 ------------
 
+- Add support for bulding docs and testing doctest snippets under ``tox``.
+
 - Add ``setup.py docs`` alias (installs Sphinx).
 
 - Add support for Python 3.2 / 3.3.

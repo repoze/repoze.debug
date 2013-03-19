@@ -109,7 +109,7 @@ class DebugGui(object):
                 'wsgi_variables': wsgivars,
                 'method': request['method'],
                 'url': request['url'],
-                'body': cgi.escape(request['body']),
+                'body': escape(request['body']),
                 }
 
             if response is not None:

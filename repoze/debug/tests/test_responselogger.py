@@ -77,7 +77,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(vlogger.logged), 2)
-        self.failUnless('(truncated at 1 bytes)' in vlogger.logged[1])
+        self.assertTrue('(truncated at 1 bytes)' in vlogger.logged[1])
 
     def test_call_overkeep(self):
         body = ['thebody']
@@ -116,7 +116,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
                          '500 Start Response Not Called')
 
     def test_call_app_iter_close(self):
-        class Iterable:
+        class Iterable(object):
             def __init__(self, data):
                 self.data = data
             def close(self):
@@ -127,6 +127,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
                 if not self.data:
                     raise StopIteration
                 return self.data.pop(0)
+            __next__ = next
         iterable = Iterable(['1', '2'])
         app = DummyBrokenApp(iterable, '200 OK', [('HeaderKey', 'headervalue')])
         vlogger = FakeLogger()
@@ -148,7 +149,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(vlogger.logged), 2)
-        self.failUnless('WARNING-1' in vlogger.logged[1])
+        self.assertTrue('WARNING-1' in vlogger.logged[1])
 
     def test_call_sourceurl_in_response(self):
         body = ['thebody']
@@ -161,7 +162,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(vlogger.logged), 2)
-        self.failUnless('URL: GET http://localhost' in vlogger.logged[1])
+        self.assertTrue('URL: GET http://localhost' in vlogger.logged[1])
 
     def test_entry_created(self):
         body = ['thebody']
@@ -176,9 +177,9 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(len(mw.entries), 1)
         entry = mw.entries[0]
         self.assertEqual(entry['response']['status'], '200 OK')
-        self.failUnless(isinstance(entry['request']['begin'], float))
-        self.failUnless(isinstance(entry['response']['begin'], float))
-        self.failUnless(isinstance(entry['response']['end'], float))
+        self.assertTrue(isinstance(entry['request']['begin'], float))
+        self.assertTrue(isinstance(entry['response']['begin'], float))
+        self.assertTrue(isinstance(entry['response']['end'], float))
         self.assertEqual(entry['response']['headers'],
                          [('Content-Length', '1')])
         self.assertEqual(entry['request']['url'], 'http://localhost')
@@ -186,9 +187,10 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(entry['response']['content-length'], 1)
         self.assertEqual(len(entry['request']['cgi_variables']), 2)
         self.assertEqual(len(entry['request']['wsgi_variables']), 2)
-        self.failUnless(isinstance(entry['id'], int))
+        self.assertTrue(isinstance(entry['id'], int))
 
     def test_trace_logging(self):
+        import time
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('Content-Length', '7')])
         vlogger = FakeLogger()
@@ -197,6 +199,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         start_response = FakeStartResponse()
         environ = self._makeEnviron()
         mw.pid = 0
+        mw._now = now = time.time()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(tlogger.logged), 4)
@@ -204,6 +207,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         entry = mw.entries[0]
         rid = entry['id']
         begin = entry['request']['begin']
+        self.assertEqual(begin, now)
         
         result = logged[0].split(' ', 4)
         self.assertEqual(result[0], 'U')
@@ -260,6 +264,8 @@ class TestMakeResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(len(mw.trace_logger.handlers), 1)
         self.assertEqual(mw.max_bodylen, 0)
         self.assertEqual(mw.keep, 0)
+        mw.verbose_logger.handlers[0].close()
+        mw.trace_logger.handlers[0].close()
 
 class FakeStartResponse:
     def __call__(self, status, headers, exc_info=None):

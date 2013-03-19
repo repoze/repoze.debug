@@ -1,7 +1,10 @@
 """GUI for presenting ways to look at the repoze.debug data
 
 """
-import cgi
+try:
+    from html import escape
+except ImportError: #pragma NO COVER Pyton3
+    from cgi import escape
 import mimetypes
 import os
 import pprint
@@ -48,7 +51,8 @@ class DebugGui(object):
         
         filename = os.path.join(self.static_dir, fn)
         res = Response(content_type=get_mimetype(filename))
-        res.body = open(filename, 'rb').read()
+        with open(filename, 'rb') as f:
+            res.body = f.read()
         return res
 
     def _generateFeedTagURI(self, when, pid):
@@ -87,14 +91,14 @@ class DebugGui(object):
             # Make the <rz:cgi_variable> nodes into a string
             cgivars = ""
             for k,v in request['cgi_variables']:
-                newv = cgi.escape(str(v))
+                newv = escape(str(v))
                 s = cgi_variable_fmt % (k, newv)
                 cgivars = cgivars + s
 
             # Make the <rz:cgi_variable> nodes into a string
             wsgivars = ""
             for k,v in request['wsgi_variables']:
-                newv = cgi.escape(str(v))
+                newv = escape(str(v))
                 s = wsgi_variable_fmt % (k, newv)
                 wsgivars = wsgivars + s
 
@@ -112,7 +116,7 @@ class DebugGui(object):
                 # Make the <rz:request> node
                 headers = ''
                 for k,v in response['headers']:
-                    newv = cgi.escape(str(v))
+                    newv = escape(str(v))
                     s = header_fmt % (k, newv)
                     headers = headers + s
 
@@ -122,7 +126,7 @@ class DebugGui(object):
                     'content-length': response['content-length'],
                     'headers': headers,
                     'status': response['status'],
-                    'body': cgi.escape(response['body']),
+                    'body': escape(response['body']),
                     }
             else:
                 rzresponse = ''
@@ -137,9 +141,9 @@ class DebugGui(object):
 
             entry_xml = entryfmt % {
                 'entry_id':entry_id,
-                'entry_title':cgi.escape(entry_title),
+                'entry_title':escape(entry_title),
                 'updated':time.strftime('%Y-%m-%dT%H:%M:%SZ', begin),
-                'summary':cgi.escape(pprint.pformat(entry)),
+                'summary':escape(pprint.pformat(entry)),
                 'content':content,
                 }
             entries_xml.append(entry_xml)

@@ -1,6 +1,5 @@
 import pdb
 import sys
-import paste.httpexceptions
 
 # stolen partly from z3c.evalexception
 def PostMortemDebug(application, *ignore_exc):
@@ -19,7 +18,12 @@ def PostMortemDebug(application, *ignore_exc):
 
 def make_middleware(app, global_conf, ignore_http_exceptions=True):
     if ignore_http_exceptions:
-        return PostMortemDebug(app, paste.httpexceptions.HTTPException)
+        try:
+            from paste.httpexceptions import HTTPException
+        except ImportError: #pragma NO COVER Py3k
+            pass
+        else: #pragma NO COVER Py3k
+            return PostMortemDebug(app, HTTPException)
     return PostMortemDebug(app)
     
 

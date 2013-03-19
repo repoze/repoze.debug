@@ -18,7 +18,7 @@ import os
 
 from setuptools import setup, find_packages
 
-requires = ['Paste', 'WebOb']
+requires = ['WebOb']
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -26,6 +26,8 @@ README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 testing_extras = ['nose', 'coverage']
+
+docs_extras = ['Sphinx']
 
 setup(name='repoze.debug',
       version=__version__,
@@ -35,8 +37,12 @@ setup(name='repoze.debug',
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.2",
+        "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Internet :: WWW/HTTP",
@@ -67,6 +73,7 @@ setup(name='repoze.debug',
       """,
       extras_require = {
         'testing':  requires + testing_extras,
+        'docs':  requires + docs_extras,
       }
 )
 

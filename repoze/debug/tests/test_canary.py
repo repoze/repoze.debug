@@ -18,7 +18,7 @@ class TestCanaryMiddleware(unittest.TestCase):
         result = mw(environ, None)
         self.assertEqual(result, True)
         from repoze.debug.canary import Canary
-        self.failUnless(isinstance(environ['repoze.debug.canary'], Canary))
+        self.assertTrue(isinstance(environ['repoze.debug.canary'], Canary))
         self.assertEqual(environ['app_saw'], True)
         
 class TestMakeCanaryMiddleware(unittest.TestCase):

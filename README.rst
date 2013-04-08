@@ -18,8 +18,6 @@ For details on using the various components, please see the
 documentation in ``docs/index.rst``.  A rendered version of that documentation
 is also available online:
 
- - http://packages.python.org/repoze.debug/
-
  - http://docs.repoze.org/debug
 
 

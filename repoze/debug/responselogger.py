@@ -95,7 +95,7 @@ class ResponseLoggingMiddleware(object):
         info['cgi_variables'] = []
         info['wsgi_variables'] = []
         info['body'] = ''
-        if environ.has_key('wsgi.input'):
+        if 'wsgi.input' in environ:
             info['body'] = environ['wsgi.input'].read()
             environ['wsgi.input'].seek(0)
         for k, v in sorted(request_data[('extra', 'CGI Variables')].items()):
@@ -119,7 +119,7 @@ class ResponseLoggingMiddleware(object):
         for k, v in info['wsgi_variables']:
             out.append('  %s: %s' % (k, v))
         out.append('Body:')
-        out.append(info['body'])
+        out.append(info['body'].decode('latin1'))
         out.append('Bodylen: %s' % len(info['body']))
         out.append('--- end REQUEST for %s ---' % request_id)
         self.verbose_logger and self.verbose_logger.info('\n'.join(out))

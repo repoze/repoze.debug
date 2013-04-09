@@ -1,7 +1,7 @@
 repoze.debug Changes
 ====================
 
-1.0 (unreleased)
+1.0 (2013-04-09)
 ----------------
 
 - Added support for recording, logging and displaying the request body

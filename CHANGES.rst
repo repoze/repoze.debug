@@ -1,11 +1,14 @@
 repoze.debug Changes
 ====================
 
-1.0b1 (2013-01-30)
-------------------
+1.0 (unreleased)
+----------------
 
 - Added support for recording, logging and displaying the request body
   (thanks to Andreas Motl for the patch).
+
+1.0b1 (2013-01-30)
+------------------
 
 - Add support for bulding docs and testing doctest snippets under ``tox``.
 

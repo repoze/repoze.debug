@@ -4,6 +4,9 @@ repoze.debug Changes
 1.0b1 (2013-01-30)
 ------------------
 
+- Added support for recording, logging and displaying the request body
+  (thanks to Andreas Motl for the patch).
+
 - Add support for bulding docs and testing doctest snippets under ``tox``.
 
 - Add ``setup.py docs`` alias (installs Sphinx).
@@ -11,8 +14,6 @@ repoze.debug Changes
 - Add support for Python 3.2 / 3.3.
 
 - Drop support for Python 2.4 / 2.5.
-
-- Added support for recording, logging and displaying the request body
 
 - Some typo fixes and enhancements to xsl stylesheet
 

@@ -125,6 +125,7 @@ class DebugGuiTests(unittest.TestCase):
                 'url': '/foo',
                 'cgi_variables': [('cgi_a', 'CGI_A')],
                 'wsgi_variables': [('wsgi_a', 'WSGI_A')],
+                'body': '',
                 },
              #'response': {},
             },
@@ -146,6 +147,7 @@ class DebugGuiTests(unittest.TestCase):
                 'url': '/foo/%s' % '/'.join(['bbb' * 40]),
                 'cgi_variables': [('cgi_a', 'CGI_A')],
                 'wsgi_variables': [('wsgi_a', 'WSGI_A')],
+                'body': '',
                 },
              #'response': {},
             },
@@ -167,6 +169,7 @@ class DebugGuiTests(unittest.TestCase):
                 'url': '/foo',
                 'cgi_variables': [('cgi_a', 'CGI_A')],
                 'wsgi_variables': [('wsgi_a', 'WSGI_A')],
+                'body': '',
                 },
              'response': {
                 'begin': 1235,

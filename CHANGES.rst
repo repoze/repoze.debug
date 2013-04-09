@@ -12,6 +12,10 @@ repoze.debug Changes
 
 - Drop support for Python 2.4 / 2.5.
 
+- Added support for recording, logging and displaying the request body
+
+- Some typo fixes and enhancements to xsl stylesheet
+
 0.7.3 (2012-03-29)
 ------------------
 

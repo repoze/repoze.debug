@@ -94,6 +94,10 @@ class ResponseLoggingMiddleware(object):
         info['url'] = supplement.source_url
         info['cgi_variables'] = []
         info['wsgi_variables'] = []
+        info['body'] = ''
+        if environ.has_key('wsgi.input'):
+            info['body'] = environ['wsgi.input'].read()
+            environ['wsgi.input'].seek(0)
         for k, v in sorted(request_data[('extra', 'CGI Variables')].items()):
             info['cgi_variables'].append((k, v))
         for k, v in sorted(request_data[('extra', 'WSGI Variables')].items()):
@@ -114,6 +118,9 @@ class ResponseLoggingMiddleware(object):
         out.append('WSGI Variables')
         for k, v in info['wsgi_variables']:
             out.append('  %s: %s' % (k, v))
+        out.append('Body:')
+        out.append(info['body'])
+        out.append('Bodylen: %s' % len(info['body']))
         out.append('--- end REQUEST for %s ---' % request_id)
         self.verbose_logger and self.verbose_logger.info('\n'.join(out))
         self.lock.acquire()

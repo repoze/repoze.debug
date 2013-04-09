@@ -109,6 +109,7 @@ class DebugGui(object):
                 'wsgi_variables': wsgivars,
                 'method': request['method'],
                 'url': request['url'],
+                'body': escape(request['body']),
                 }
 
             if response is not None:
@@ -204,6 +205,9 @@ rzrequest_fmt = """<rz:request>
   <rz:method>%(method)s</rz:method>
   <rz:url>%(url)s</rz:url>
   %(wsgi_variables)s  
+  <rz:body>
+%(body)s
+  </rz:body>
 </rz:request>
 """
 

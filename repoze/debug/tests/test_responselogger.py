@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 import unittest
 
 class TestResponseLoggingMiddleware(unittest.TestCase):
@@ -48,6 +49,21 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         mw = self._makeOne(app, 0, 10, vlogger, tlogger)
         environ = self._makeEnviron()
         environ['PATH_INFO'] = '/__repoze.debug/feed.xml'
+        environ['REQUEST_METHOD'] = 'GET'
+        start_response = FakeStartResponse()
+        app_iter = mw(environ, start_response)
+
+    def test_call_umlaut_url(self):
+        body = ['thebody']
+        app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 0, 10, vlogger, tlogger)
+        environ = self._makeEnviron()
+        # Having special characters in url lacking
+        # proper url encoding obviously is invalid,
+        # but we should be graceful though.
+        environ['PATH_INFO'] = '/äöü'
         environ['REQUEST_METHOD'] = 'GET'
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)

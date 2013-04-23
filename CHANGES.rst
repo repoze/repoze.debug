@@ -1,6 +1,12 @@
 repoze.debug Changes
 ====================
 
+develop
+-------
+
+- Prevent croaking if URL contains invalid (unquoted) characters
+
+
 1.0 (2013-04-09)
 ----------------
 

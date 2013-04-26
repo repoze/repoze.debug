@@ -1,6 +1,8 @@
 import unittest
 
+
 class TestResponseLoggingMiddleware(unittest.TestCase):
+
     def _getTargetClass(self):
         from repoze.debug.responselogger import ResponseLoggingMiddleware
         return ResponseLoggingMiddleware
@@ -9,27 +11,13 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         klass = self._getTargetClass()
         return klass(*arg, **kw)
 
-    def _makeEnviron(self):
-        import io
-        environ = {
-            'SERVER_NAME':'localhost',
-            'SERVER_PORT':'80',
-            'wsgi.version':(1,0),
-            'wsgi.multiprocess':False,
-            'wsgi.multithread':True,
-            'wsgi.run_once':False,
-            'wsgi.url_scheme':'http',
-            'wsgi.input':io.BytesIO(b'hello world'),
-            }
-        return environ
-
     def test_call(self):
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
         vlogger = FakeLogger()
         tlogger = FakeLogger()
         mw = self._makeOne(app, 0, 10, vlogger, tlogger)
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(list(app_iter)), 'thebody')
@@ -46,7 +34,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         vlogger = FakeLogger()
         tlogger = FakeLogger()
         mw = self._makeOne(app, 0, 10, vlogger, tlogger)
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         environ['PATH_INFO'] = '/__repoze.debug/feed.xml'
         environ['REQUEST_METHOD'] = 'GET'
         start_response = FakeStartResponse()
@@ -56,7 +44,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         body = ['thebody']
         app = DummyApp(body, '200 OK', [('HeaderKey', 'headervalue')])
         mw = self._makeOne(app, 0, 10, None, None)
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(list(app_iter)), 'thebody')
@@ -72,7 +60,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         vlogger = FakeLogger()
         tlogger = FakeLogger()
         mw = self._makeOne(app, 1, 10, vlogger, tlogger)
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
@@ -86,7 +74,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         tlogger = FakeLogger()
         mw = self._makeOne(app, 1, 1, vlogger, tlogger)
         mw.entries = ['a']
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(len(mw.entries), 1)
@@ -98,7 +86,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         tlogger = FakeLogger()
         mw = self._makeOne(app, 1, 0, vlogger, tlogger)
         mw.entries = []
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(len(mw.entries), 0)
@@ -109,7 +97,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         vlogger = FakeLogger()
         tlogger = FakeLogger()
         mw = self._makeOne(app, 1, 1, vlogger, tlogger)
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(mw.entries[-1]['response']['status'],
@@ -133,7 +121,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         vlogger = FakeLogger()
         tlogger = FakeLogger()
         mw = self._makeOne(app, 1, 1, vlogger, tlogger)
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         start_response = FakeStartResponse()
         app_iter = list(mw(environ, start_response))
         self.assertEqual(iterable.closed, True)
@@ -144,7 +132,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         vlogger = FakeLogger()
         tlogger = FakeLogger()
         mw = self._makeOne(app, 1, 10, vlogger, tlogger)
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
@@ -157,7 +145,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         vlogger = FakeLogger()
         tlogger = FakeLogger()
         mw = self._makeOne(app, 1, 10, vlogger, tlogger)
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
@@ -171,7 +159,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         tlogger = FakeLogger()
         mw = self._makeOne(app, 1, 10, vlogger, tlogger)
         start_response = FakeStartResponse()
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         app_iter = mw(environ, start_response)
         self.assertEqual(''.join(app_iter), 'thebody')
         self.assertEqual(len(mw.entries), 1)
@@ -197,7 +185,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         tlogger = FakeLogger()
         mw = self._makeOne(app, 1, 10, vlogger, tlogger)
         start_response = FakeStartResponse()
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         mw.pid = 0
         mw._now = now = time.time()
         app_iter = mw(environ, start_response)
@@ -236,7 +224,9 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(result[3], str(begin))
         self.assertEqual(result[4], '7')
 
+
 class Test_make_middleware(unittest.TestCase):
+
     def _getFUT(self):
         from repoze.debug.responselogger import make_middleware
         return make_middleware
@@ -267,20 +257,26 @@ class Test_make_middleware(unittest.TestCase):
         mw.verbose_logger.handlers[0].close()
         mw.trace_logger.handlers[0].close()
 
+
 class FakeStartResponse:
+
     def __call__(self, status, headers, exc_info=None):
         self.status = status
         self.headers = headers
         self.exc_info = exc_info
 
+
 class FakeLogger:
+
     def __init__(self):
         self.logged = []
         
     def info(self, msg):
         self.logged.append(msg)
 
+
 class DummyApp:
+
     def __init__(self, body, status, headers):
         self.body = body
         self.status = status
@@ -292,6 +288,21 @@ class DummyApp:
         return self.body
     
 class DummyBrokenApp(DummyApp):
+
     def __call__(self,environ, start_response):
         self.called = True
         return self.body
+
+def _makeEnviron():
+    import io
+    environ = {
+        'SERVER_NAME':'localhost',
+        'SERVER_PORT':'80',
+        'wsgi.version':(1,0),
+        'wsgi.multiprocess':False,
+        'wsgi.multithread':True,
+        'wsgi.run_once':False,
+        'wsgi.url_scheme':'http',
+        'wsgi.input':io.BytesIO(b'hello world'),
+        }
+    return environ

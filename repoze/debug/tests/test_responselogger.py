@@ -236,7 +236,7 @@ class TestResponseLoggingMiddleware(unittest.TestCase):
         self.assertEqual(result[3], str(begin))
         self.assertEqual(result[4], '7')
 
-class TestMakeResponseLoggingMiddleware(unittest.TestCase):
+class Test_make_middleware(unittest.TestCase):
     def _getFUT(self):
         from repoze.debug.responselogger import make_middleware
         return make_middleware

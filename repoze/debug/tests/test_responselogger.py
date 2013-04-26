@@ -546,6 +546,32 @@ class Test_construct_url(unittest.TestCase):
                          'http://example.com?foo=bar&qux=spam')
 
 
+class Test_header_value(unittest.TestCase):
+
+    def _callFUT(self, headers, name):
+        from repoze.debug.responselogger import header_value
+        return header_value(headers, name)
+
+    def test_miss(self):
+        self.assertEqual(self._callFUT([], 'nonesuch'), None)
+
+    def test_hit_simple(self):
+        self.assertEqual(
+            self._callFUT([('Header-Name', 'Value')], 'Header-Name'), 'Value')
+
+    def test_hit_multiple(self):
+        self.assertEqual(
+            self._callFUT([('Header-Name', 'Value1'),
+                           ('Header-Name', 'Value2'),
+                          ], 'Header-Name'), 'Value1,Value2')
+
+    def test_case_insensitive(self):
+        self.assertEqual(
+            self._callFUT([('Header-Name', 'Value')], 'HEADER-NAME'), 'Value')
+        self.assertEqual(
+            self._callFUT([('HEADER-NAME', 'Value')], 'Header-Name'), 'Value')
+
+
 class FakeStartResponse(object):
 
     def __call__(self, status, headers, exc_info=None):

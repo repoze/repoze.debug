@@ -1,6 +1,11 @@
 repoze.debug Changes
 ====================
 
+Next release
+------------
+
+- Restored 100% unit test coverage.
+
 1.0 (2013-04-09)
 ----------------
 

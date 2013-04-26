@@ -277,6 +277,102 @@ class SupplementTests(unittest.TestCase):
         self.assertTrue(supplement.environ is environ)
         self.assertEqual(supplement.source_url, 'http://localhost')
 
+    def test_extraData_non_concurrent(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron({'wsgi.multiprocess': 0,
+                                'wsgi.multithread': 0,
+                                'wsgi.run_once': 0,
+                               })
+        supplement = self._makeOne(middleware, environ)
+        data = supplement.extraData()
+        self.assertEqual(data[('extra', 'WSGI Variables')]['wsgi process'],
+                         'Non-concurrent server')
+
+    def test_extraData_multithreaded(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron({'wsgi.multiprocess': 0,
+                                'wsgi.multithread': 1,
+                                'wsgi.run_once': 0,
+                               })
+        supplement = self._makeOne(middleware, environ)
+        data = supplement.extraData()
+        self.assertEqual(data[('extra', 'WSGI Variables')]['wsgi process'],
+                         'Multithreaded')
+
+    def test_extraData_multiprocess(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron({'wsgi.multiprocess': 1,
+                                'wsgi.multithread': 0,
+                                'wsgi.run_once': 0,
+                               })
+        supplement = self._makeOne(middleware, environ)
+        data = supplement.extraData()
+        self.assertEqual(data[('extra', 'WSGI Variables')]['wsgi process'],
+                         'Multiprocess')
+
+    def test_extraData_multiprocess_and_threads(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron({'wsgi.multiprocess': 1,
+                                'wsgi.multithread': 1,
+                                'wsgi.run_once': 0,
+                               })
+        supplement = self._makeOne(middleware, environ)
+        data = supplement.extraData()
+        self.assertEqual(data[('extra', 'WSGI Variables')]['wsgi process'],
+                         'Multi process AND threads (?)')
+
+    def test_extraData_non_concurrent_CGI(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron({'wsgi.multiprocess': 0,
+                                'wsgi.multithread': 0,
+                                'wsgi.run_once': 1,
+                               })
+        supplement = self._makeOne(middleware, environ)
+        data = supplement.extraData()
+        self.assertEqual(data[('extra', 'WSGI Variables')]['wsgi process'],
+                         'Non-concurrent CGI')
+
+    def test_extraData_multithread_CGI(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron({'wsgi.multiprocess': 0,
+                                'wsgi.multithread': 1,
+                                'wsgi.run_once': 1,
+                               })
+        supplement = self._makeOne(middleware, environ)
+        data = supplement.extraData()
+        self.assertEqual(data[('extra', 'WSGI Variables')]['wsgi process'],
+                         'Multithread CGI (?)')
+
+    def test_extraData_CGI(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron({'wsgi.multiprocess': 1,
+                                'wsgi.multithread': 0,
+                                'wsgi.run_once': 1,
+                               })
+        supplement = self._makeOne(middleware, environ)
+        data = supplement.extraData()
+        self.assertEqual(data[('extra', 'WSGI Variables')]['wsgi process'],
+                         'CGI')
+
+    def test_extraData_multithread_process_CGI(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron({'wsgi.multiprocess': 1,
+                                'wsgi.multithread': 1,
+                                'wsgi.run_once': 1,
+                               })
+        supplement = self._makeOne(middleware, environ)
+        data = supplement.extraData()
+        self.assertEqual(data[('extra', 'WSGI Variables')]['wsgi process'],
+                         'Multi thread/process CGI (?)')
+
     def test_extraData_no_unhidden_vars(self):
         app = object()
         middleware = DummyMiddleware(app)

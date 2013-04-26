@@ -114,7 +114,7 @@ class ResponseLoggingMiddleware(object):
         out.append('URL: %s' % method_and_url)
         out.append('CGI Variables')
         for k, v in info['cgi_variables']:
-            out.append('  %s: %s' % (k, v))
+            out.append('  %s: %s' % (k, v.decode('latin1')))
         out.append('WSGI Variables')
         for k, v in info['wsgi_variables']:
             out.append('  %s: %s' % (k, v))

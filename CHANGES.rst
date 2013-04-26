@@ -4,7 +4,10 @@ repoze.debug Changes
 Next release
 ------------
 
+- Prevent croaking if URL contains invalid (unquoted) characters
+
 - Restored 100% unit test coverage.
+
 
 1.0 (2013-04-09)
 ----------------

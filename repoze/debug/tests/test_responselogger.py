@@ -1,7 +1,7 @@
 import unittest
 
 
-class TestResponseLoggingMiddleware(unittest.TestCase):
+class ResponseLoggingMiddlewareTests(unittest.TestCase):
 
     def _getTargetClass(self):
         from repoze.debug.responselogger import ResponseLoggingMiddleware
@@ -258,7 +258,111 @@ class Test_make_middleware(unittest.TestCase):
         mw.trace_logger.handlers[0].close()
 
 
-class FakeStartResponse:
+class SupplementTests(unittest.TestCase):
+
+    def _getTargetClass(self):
+        from repoze.debug.responselogger import Supplement
+        return Supplement
+
+    def _makeOne(self, middleware, environ):
+        klass = self._getTargetClass()
+        return klass(middleware, environ)
+
+    def test_ctor(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron()
+        supplement = self._makeOne(middleware, environ)
+        self.assertTrue(supplement.middleware is middleware)
+        self.assertTrue(supplement.environ is environ)
+        self.assertEqual(supplement.source_url, 'http://localhost')
+
+    def test_extraData_no_unhidden_vars(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron()
+        supplement = self._makeOne(middleware, environ)
+        data = supplement.extraData()
+        self.assertEqual(sorted(data),
+                         [('extra', 'CGI Variables'),
+                          ('extra', 'WSGI Variables'),
+                         ])
+        self.assertEqual(data[('extra', 'CGI Variables')],
+                         {'SERVER_NAME': 'localhost',
+                          'SERVER_PORT': '80',
+                         }
+                        )
+        self.assertEqual(data[('extra', 'WSGI Variables')],
+                         {'application': app,
+                          'wsgi process': 'Multithreaded',
+                         })
+
+    def test_extraData_w_unhidden_vars(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron({'x-other': 'foo'})
+        supplement = self._makeOne(middleware, environ)
+        data = supplement.extraData()
+        self.assertEqual(sorted(data),
+                         [('extra', 'CGI Variables'),
+                          ('extra', 'WSGI Variables'),
+                         ])
+        self.assertEqual(data[('extra', 'CGI Variables')],
+                         {'SERVER_NAME': 'localhost',
+                          'SERVER_PORT': '80',
+                         }
+                        )
+        self.assertEqual(data[('extra', 'WSGI Variables')],
+                         {'application': app,
+                          'wsgi process': 'Multithreaded',
+                          'x-other': 'foo',
+                         })
+
+    def test_extraData_w_non_default_wsgi_version(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron({'wsgi.version': (3, 0)})
+        supplement = self._makeOne(middleware, environ)
+        data = supplement.extraData()
+        self.assertEqual(sorted(data),
+                         [('extra', 'CGI Variables'),
+                          ('extra', 'WSGI Variables'),
+                         ])
+        self.assertEqual(data[('extra', 'CGI Variables')],
+                         {'SERVER_NAME': 'localhost',
+                          'SERVER_PORT': '80',
+                         }
+                        )
+        self.assertEqual(data[('extra', 'WSGI Variables')],
+                         {'application': app,
+                          'wsgi process': 'Multithreaded',
+                          'wsgi.version': (3, 0),
+                         })
+
+    def test_extraData_w_paste_config(self):
+        app = object()
+        middleware = DummyMiddleware(app)
+        environ = _makeEnviron({'paste.config': {'foo': 'bar'}})
+        supplement = self._makeOne(middleware, environ)
+        data = supplement.extraData()
+        self.assertEqual(sorted(data),
+                         [('extra', 'CGI Variables'),
+                          ('extra', 'Configuration'),
+                          ('extra', 'WSGI Variables'),
+                         ])
+        self.assertEqual(data[('extra', 'Configuration')], {'foo': 'bar'})
+        self.assertEqual(data[('extra', 'CGI Variables')],
+                         {'SERVER_NAME': 'localhost',
+                          'SERVER_PORT': '80',
+                         }
+                        )
+        self.assertEqual(data[('extra', 'WSGI Variables')],
+                         {'application': app,
+                          'wsgi process': 'Multithreaded',
+                         })
+
+
+class FakeStartResponse(object):
 
     def __call__(self, status, headers, exc_info=None):
         self.status = status
@@ -266,7 +370,7 @@ class FakeStartResponse:
         self.exc_info = exc_info
 
 
-class FakeLogger:
+class FakeLogger(object):
 
     def __init__(self):
         self.logged = []
@@ -275,7 +379,7 @@ class FakeLogger:
         self.logged.append(msg)
 
 
-class DummyApp:
+class DummyApp(object):
 
     def __init__(self, body, status, headers):
         self.body = body
@@ -286,6 +390,7 @@ class DummyApp:
         start_response(self.status, self.headers)
         self.called = True
         return self.body
+
     
 class DummyBrokenApp(DummyApp):
 
@@ -293,16 +398,25 @@ class DummyBrokenApp(DummyApp):
         self.called = True
         return self.body
 
-def _makeEnviron():
+
+class DummyMiddleware(object):
+
+    def __init__(self, application):
+        self.application = application
+
+
+def _makeEnviron(override=None):
     import io
     environ = {
-        'SERVER_NAME':'localhost',
-        'SERVER_PORT':'80',
-        'wsgi.version':(1,0),
-        'wsgi.multiprocess':False,
-        'wsgi.multithread':True,
-        'wsgi.run_once':False,
-        'wsgi.url_scheme':'http',
-        'wsgi.input':io.BytesIO(b'hello world'),
+        'SERVER_NAME': 'localhost',
+        'SERVER_PORT': '80',
+        'wsgi.version': (1, 0),
+        'wsgi.multiprocess': False,
+        'wsgi.multithread': True,
+        'wsgi.run_once': False,
+        'wsgi.url_scheme': 'http',
+        'wsgi.input': io.BytesIO(b'hello world'),
         }
+    if override is not None:
+        environ.update(override)
     return environ

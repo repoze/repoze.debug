@@ -456,6 +456,96 @@ class SupplementTests(unittest.TestCase):
                          })
 
 
+class Test_construct_url(unittest.TestCase):
+
+    def _callFUT(self, environ):
+        from repoze.debug.responselogger import construct_url
+        return construct_url(environ)
+
+    def test_w_HTTP_HOST_wo_port(self):
+        environ = _makeEnviron({'HTTP_HOST': 'example.com'})
+        self.assertEqual(self._callFUT(environ), 'http://example.com')
+
+    def test_w_HTTP_HOST_w_default_http_port(self):
+        environ = _makeEnviron({'HTTP_HOST': 'example.com:80'})
+        self.assertEqual(self._callFUT(environ), 'http://example.com')
+
+    def test_w_HTTP_HOST_w_non_default_http_port(self):
+        environ = _makeEnviron({'HTTP_HOST': 'example.com:8080'})
+        self.assertEqual(self._callFUT(environ), 'http://example.com:8080')
+
+    def test_w_HTTP_HOST_w_default_https_port(self):
+        environ = _makeEnviron({'HTTP_HOST': 'example.com:443',
+                                'wsgi.url_scheme': 'https',
+                               })
+        self.assertEqual(self._callFUT(environ), 'https://example.com')
+
+    def test_w_HTTP_HOST_w_non_default_https_port(self):
+        environ = _makeEnviron({'HTTP_HOST': 'example.com:4443',
+                                'wsgi.url_scheme': 'https',
+                               })
+        self.assertEqual(self._callFUT(environ), 'https://example.com:4443')
+
+    def test_wo_HTTP_HOST_w_default_http_port(self):
+        environ = _makeEnviron({'SERVER_NAME': 'example.com',
+                                'SERVER_PORT': '80',
+                               })
+        self.assertEqual(self._callFUT(environ), 'http://example.com')
+
+    def test_wo_HTTP_HOST_w_non_default_http_port(self):
+        environ = _makeEnviron({'SERVER_NAME': 'example.com',
+                                'SERVER_PORT': '8080',
+                               })
+        self.assertEqual(self._callFUT(environ), 'http://example.com:8080')
+
+    def test_wo_HTTP_HOST_w_default_https_port(self):
+        environ = _makeEnviron({'SERVER_NAME': 'example.com',
+                                'SERVER_PORT': '443',
+                                'wsgi.url_scheme': 'https',
+                               })
+        self.assertEqual(self._callFUT(environ), 'https://example.com')
+
+    def test_wo_HTTP_HOST_w_non_default_https_port(self):
+        environ = _makeEnviron({'SERVER_NAME': 'example.com',
+                                'SERVER_PORT': '4443',
+                                'wsgi.url_scheme': 'https',
+                               })
+        self.assertEqual(self._callFUT(environ), 'https://example.com:4443')
+
+    def test_w_SCRIPT_NAME(self):
+        environ = _makeEnviron({'SERVER_NAME': 'example.com',
+                                'SERVER_PORT': '80',
+                                'SCRIPT_NAME': '/script/name',
+                               })
+        self.assertEqual(self._callFUT(environ),
+                         'http://example.com/script/name')
+
+    def test_w_PATH_INFO(self):
+        environ = _makeEnviron({'SERVER_NAME': 'example.com',
+                                'SERVER_PORT': '80',
+                                'PATH_INFO': '/path/info',
+                               })
+        self.assertEqual(self._callFUT(environ),
+                         'http://example.com/path/info')
+
+    def test_w_SCRIPT_NAME_and_PATH_INFO(self):
+        environ = _makeEnviron({'SERVER_NAME': 'example.com',
+                                'SERVER_PORT': '80',
+                                'SCRIPT_NAME': '/script/name',
+                                'PATH_INFO': '/path/info',
+                               })
+        self.assertEqual(self._callFUT(environ),
+                         'http://example.com/script/name/path/info')
+
+    def test_w_QUERY_STRING(self):
+        environ = _makeEnviron({'SERVER_NAME': 'example.com',
+                                'SERVER_PORT': '80',
+                                'QUERY_STRING': 'foo=bar&qux=spam',
+                               })
+        self.assertEqual(self._callFUT(environ),
+                         'http://example.com?foo=bar&qux=spam')
+
+
 class FakeStartResponse(object):
 
     def __call__(self, status, headers, exc_info=None):

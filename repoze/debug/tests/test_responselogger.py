@@ -47,7 +47,7 @@ class ResponseLoggingMiddlewareTests(unittest.TestCase):
         vlogger = FakeLogger()
         tlogger = FakeLogger()
         mw = self._makeOne(app, 0, 10, vlogger, tlogger)
-        environ = self._makeEnviron()
+        environ = _makeEnviron()
         # Having special characters in url lacking
         # proper url encoding obviously is invalid,
         # but we should be graceful though.

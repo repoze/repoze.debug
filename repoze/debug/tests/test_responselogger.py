@@ -227,29 +227,27 @@ class ResponseLoggingMiddlewareTests(unittest.TestCase):
 
 class Test_make_middleware(unittest.TestCase):
 
-    def _getFUT(self):
+    def _callFUT(self, app, global_conf, *args):
         from repoze.debug.responselogger import make_middleware
-        return make_middleware
+        return make_middleware(app, global_conf, *args)
 
     def test_make_middleware_defaults(self):
-        f = self._getFUT()
+        import tempfile
         app = DummyApp(None, None, None)
         global_conf = {}
-        import tempfile
         fn = tempfile.mktemp()
-        mw = f(app, global_conf)
+        mw = self._callFUT(app, global_conf)
         self.assertEqual(mw.verbose_logger, None)
         self.assertEqual(mw.max_bodylen, 3072)
         self.assertEqual(mw.keep, 100)
 
     def test_make_middleware_nondefaults(self):
-        f = self._getFUT()
+        import tempfile
         app = DummyApp(None, None, None)
         global_conf = {}
-        import tempfile
         vfn = tempfile.mktemp()
         tfn = tempfile.mktemp()
-        mw = f(app, global_conf, vfn, tfn, '0', '0', '0', '0')
+        mw = self._callFUT(app, global_conf, vfn, tfn, '0', '0', '0', '0')
         self.assertEqual(len(mw.verbose_logger.handlers), 1)
         self.assertEqual(len(mw.trace_logger.handlers), 1)
         self.assertEqual(mw.max_bodylen, 0)

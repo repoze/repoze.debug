@@ -114,7 +114,11 @@ class ResponseLoggingMiddleware(object):
         out.append('URL: %s' % method_and_url)
         out.append('CGI Variables')
         for k, v in info['cgi_variables']:
-            out.append('  %s: %s' % (k, v.decode('latin1')))
+            # Just decode value if its type is "bytes".
+            # It looks like it's already Unicode in Python>=3.0.
+            if isinstance(v, bytes):
+                v = v.decode('latin1')
+            out.append('  %s: %s' % (k, v))
         out.append('WSGI Variables')
         for k, v in info['wsgi_variables']:
             out.append('  %s: %s' % (k, v))

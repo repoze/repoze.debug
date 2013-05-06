@@ -1,5 +1,6 @@
 env26/
 env27/
+env33/
 *.egg
 *.egg-info
 *.pyc

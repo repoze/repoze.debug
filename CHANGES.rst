@@ -1,13 +1,12 @@
 repoze.debug Changes
 ====================
 
-Next release
-------------
+1.0.1 (2013-05-17)
+------------------
 
 - Work around URLs which contain invalid (unquoted) characters.
 
 - Restored 100% unit test coverage.
-
 
 1.0 (2013-04-09)
 ----------------

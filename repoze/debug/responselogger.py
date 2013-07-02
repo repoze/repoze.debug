@@ -169,7 +169,7 @@ class ResponseLoggingMiddleware(object):
         out.append('Response Headers')
         for k, v in response_info['headers']:
             out.append('  %s: %s' % (k, v))
-        bodyout = ''
+        bodyout = b''
         bodylen = 0
         remaining = None
         for chunk in body:
@@ -179,8 +179,9 @@ class ResponseLoggingMiddleware(object):
             bodylen += len(chunk)
             yield chunk
         if bodylen > self.max_bodylen:
-            bodyout += ' ... (truncated at %s bytes)' % self.max_bodylen
-        out.append('Body:\n' + bodyout)
+            bodyout += (' ... (truncated at %s bytes)' % self.max_bodylen
+                       ).encode('ascii')
+        out.append('Body:\n' + bodyout.decode('ascii', 'replace'))
         out.append('Bodylen: %s' % bodylen)
         if cl is not None:
             if bodylen != cl:

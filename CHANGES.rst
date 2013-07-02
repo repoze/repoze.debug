@@ -1,8 +1,8 @@
 repoze.debug Changes
 ====================
 
-Unreleased
-----------
+1.0.2 (2013-07-02)
+------------------
 
 - Fix reponse logger handling of WSGI app_iter-as-bytes under Py3k.
 

@@ -96,10 +96,13 @@ class ResponseLoggingMiddleware(object):
         info['wsgi_variables'] = []
         info['body'] = ''
         if 'wsgi.input' in environ:
-            from cStringIO import StringIO
             length = int(environ.get('CONTENT_LENGTH', '0'))
             info['body'] = environ['wsgi.input'].read(length)
-            environ['wsgi.input'] = StringIO(info['body']) # wrapped app gets copy
+            try:
+                environ['wsgi.input'].seek(0)
+            except AttributeError:
+                from cStringIO import StringIO
+                environ['wsgi.input'] = StringIO(info['body'])
         for k, v in sorted(request_data[('extra', 'CGI Variables')].items()):
             info['cgi_variables'].append((k, v))
         for k, v in sorted(request_data[('extra', 'WSGI Variables')].items()):

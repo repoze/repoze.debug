@@ -1,6 +1,11 @@
 repoze.debug Changes
 ====================
 
+Unreleased
+----------
+
+- PR #5:  Avoid breaking when ``wsgi.input`` has no ``seek()`` method.
+
 1.0.2 (2013-07-02)
 ------------------
 

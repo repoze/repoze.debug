@@ -1,13 +1,12 @@
 import datetime
 import sys
-try:
-    import thread
-except ImportError:                 #pragma NO COVER Python 3.x
-    import _thread as thread
 
 import traceback
 
 import webob
+
+from ._compat import thread
+from ._compat import TEXT
 
 _NOW = None
 def _now():
@@ -41,6 +40,8 @@ class MonitoringMiddleware(object):
     """The monitoring middleware intercepts requests for the path
     '/debug_threads' and returns a plain-text thread dump."""
     
+    _frames = _thread_id = None  # testing hooks
+
     def __init__(self, app):
         self.app = app
         
@@ -50,9 +51,9 @@ class MonitoringMiddleware(object):
         if request.path == '/debug_threads':
             response = webob.Response(request=request)
             response.content_type = 'text/plain'
-            t = dump_threads()
-            if isinstance(t, unicode):
-                response.unicode_body = t
+            t = dump_threads(self._frames, self._thread_id)
+            if isinstance(t, TEXT):  # pragma NO COVER Py3k
+                response.text = t
             else:
                 response.body = t
         else:

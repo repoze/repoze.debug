@@ -14,7 +14,13 @@
 
 $Id: requestprofiler.py 40218 2005-11-18 14:39:19Z andreasjung $
 """
-import cPickle
+try:
+    from cPickle import Pickler
+    from cPickle import Unpickler
+except ImportError:
+    from pickle import Pickler
+    from pickle import Unpickler
+
 import getopt
 try:
     import gzip
@@ -259,7 +265,7 @@ def get_earliest_file_data(files):
         line = line.strip()
         tup = parselogline(line)
         if tup is None:
-            print "Could not interpret line: %s" % line
+            print("Could not interpret line: %s" % line)
             continue
         code, pid, id, timestr, desc = tup
         timestr = timestr.strip()
@@ -320,7 +326,8 @@ def get_requests(files, start=None, end=None, statsfname=None,
             try:
                 request.put(code, fromepoch, desc)
             except:
-                print "Unable to handle entry: %s %s %s"%(code, fromepoch, desc)
+                print("Unable to handle entry: %s %s %s"
+                        % (code, fromepoch, desc))
             if request.isfinished():
                 del unfinished[(pid, id)]
                 finished.append(request)
@@ -390,18 +397,23 @@ def urlfocuswrite(requests, url, t):
         start = r.start
         earliest = start - t
         latest = start + t
-        print 'URLs invoked %s seconds before and after %s (#%s, %s)' % \
-              (t, url, x, r.shortprettystart())
-        print '---'
+        print('URLs invoked %s seconds before and after %s (#%s, %s)'
+                % (t, url, x, r.shortprettystart()))
+        print('---')
         i = -1
+
+        def _showRequest(req, st):
+            print('%3d %s %s'
+                    % ((req.start - st),
+                        req.shortprettystart(),
+                        req.url))
+
         for request in requests:
             i = i + 1
             if request.start < earliest: continue
             if request.start > latest: break
             if n == i: # current request
-                print '%3d' % (request.start - start),
-                print '%s' % (request.shortprettystart()),
-                print request.url
+                _showRequest(request, start)
                 continue
             if request.start <= start:
                 if before.get(i):
@@ -413,36 +425,34 @@ def urlfocuswrite(requests, url, t):
                     after[i] = after[i] + 1
                 else:
                     after[i] = 1
-            print '%3d' % (request.start - start),
-            print '%s' % (request.shortprettystart()),
-            print request.url
-        print
-    print ('Summary of URLs invoked before (and at the same time as) %s '
-           '(times, url)' % url)
+            _showRequest(request, start)
+        print('')
+    print('Summary of URLs invoked before (and at the same time as) %s '
+          '(times, url)' % url)
     before = before.items()
     before.sort()
     for k,v in before:
-        print v, requests[k].url
-    print
-    print 'Summary of URLs invoked after %s (times, url)' % url
+        print("%s, %s" % (v, requests[k].url))
+    print('')
+    print('Summary of URLs invoked after %s (times, url)' % url)
     after = after.items()
     after.sort()
     for k,v in after:
-        print v, requests[k].url
+        print("%s, %s" % (v, requests[k].url))
 
 def write(requests, top=0, verbose=False):
     if len(requests) == 0:
-        print "No data."
+        print("No data.")
         return
     i = 0
     header = requests[0].getheader()
-    print header
+    print(header)
     for stat in requests:
         i = i + 1
         if verbose:
-            print str(stat)
+            print(str(stat))
         else:
-            print str(stat)[:78]
+            print(str(stat)[:78])
         if i == top:
             break
 
@@ -454,14 +464,14 @@ def getdate(val):
         t = time.mktime((year, month, day, hour, minute, second, 0, 0, -1))
         return t
     except:
-        raise ProfileException, "bad date %s" % val
+        raise ProfileException("bad date %s" % val)
 
 def timewrite(requests, start, end, resolution):
-    print "Start: %s    End: %s   Resolution: %d secs" % \
-        (tick2str(start), tick2str(end), resolution)
-    print "-" * 78
-    print
-    print "Date/Time                #requests requests/second"
+    print("Start: %s    End: %s   Resolution: %d secs"
+            % (tick2str(start), tick2str(end), resolution))
+    print("-" * 78)
+    print('')
+    print("Date/Time                #requests requests/second")
 
     d = {}
     max = 0
@@ -495,14 +505,14 @@ def timewrite(requests, start, end, resolution):
 
         s = tick2str(slice)
         s = s + "     %6d         %4.2lf" % (num,num*1.0/resolution)
-        print s
+        print(s)
 
-    print '='*78
-    print " Peak:                  %6d         %4.2lf" % \
-        (max_requests,max_requests*1.0/resolution)
-    print "  Avg:                  %6d         %4.2lf" % \
-        (avg_requests,avg_requests*1.0/resolution)
-    print "Total:                  %6d          n/a " % (hits)
+    print('='*78)
+    print(" Peak:                  %6d         %4.2lf"
+            % (max_requests,max_requests*1.0/resolution))
+    print("  Avg:                  %6d         %4.2lf"
+            % (avg_requests,avg_requests*1.0/resolution))
+    print("Total:                  %6d          n/a " % hits)
 
 def tick2str(t):
     return time.strftime('%Y-%m-%dT%H:%M:%S', time.localtime(t))
@@ -723,10 +733,10 @@ If the --help argument is given, detailed usage docs are provided."""
 
 def main():
     if len(sys.argv) == 1:
-        print usage()
+        print(usage())
         sys.exit(0)
     if sys.argv[1] == '--help':
-        print detailedusage()
+        print(detailedusage())
         sys.exit(0)
     mode = 'cumulative'
     sortby = None
@@ -775,7 +785,7 @@ def main():
             if opt=='--top':
                 top=int(val)
             if opt=='--help':
-                print detailedusage()
+                print(detailedusage())
                 sys.exit(0)
             if opt=='--verbose':
                 verbose = 1
@@ -851,20 +861,20 @@ def main():
 
     except AssertionError as val:
         a = "%s is not a valid %s sort spec, use one of %s"
-        print a % (val[0], val[1], val[2])
+        print(a % (val[0], val[1], val[2]))
         sys.exit(0)
     except getopt.error as val:
-        print val
+        print(val)
         sys.exit(0)
     except ProfileException as val:
-        print val
+        print(val)
         sys.exit(0)
     except SystemExit:
         sys.exit(0)
     except:
         import traceback
         traceback.print_exc()
-        print usage()
+        print(usage())
         sys.exit(0)
 
 if __name__ == '__main__':

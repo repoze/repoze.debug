@@ -61,7 +61,7 @@ setup(name='repoze.debug',
       zip_safe=False,
       tests_require = requires,
       install_requires = requires,
-      test_suite="repoze.debug.tests",
+      test_suite="repoze.debug",
       entry_points = """\
         [paste.filter_app_factory]
         responselogger = repoze.debug.responselogger:make_middleware

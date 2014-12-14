@@ -1,16 +1,14 @@
 """GUI for presenting ways to look at the repoze.debug data
 
 """
-try:
-    from html import escape
-except ImportError: #pragma NO COVER Pyton3
-    from cgi import escape
 import mimetypes
 import os
 import pprint
 import time
 
 from webob import Response
+
+from repoze.debug._compat import escape
 
 _HERE = os.path.abspath(os.path.dirname(__file__))
 gui_flag = '__repoze.debug'

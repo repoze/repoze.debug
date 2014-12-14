@@ -14,20 +14,13 @@
 
 $Id: requestprofiler.py 40218 2005-11-18 14:39:19Z andreasjung $
 """
-try:
-    from cPickle import Pickler
-    from cPickle import Unpickler
-except ImportError:
-    from pickle import Pickler
-    from pickle import Unpickler
-
 import getopt
-try:
-    import gzip
-except:
-    gzip = None
 import sys
 import time
+
+from repoze.debug._compat import Pickler
+from repoze.debug._compat import Unpickler
+from repoze.debug._compat import gzip
 
 class ProfileException(Exception):
     pass
@@ -288,7 +281,7 @@ def get_requests(files, start=None, end=None, statsfname=None,
     unfinished = {}
     if readstats:
         fp = open(statsfname, 'r')
-        u = cPickle.Unpickler(fp)
+        u = Unpickler(fp)
         requests = u.load()
         fp.close()
         del u
@@ -337,7 +330,7 @@ def get_requests(files, start=None, end=None, statsfname=None,
 
         if writestats:
             fp = open(statsfname, 'w')
-            p = cPickle.Pickler(fp)
+            p = Pickler(fp)
             p.dump(requests)
             fp.close()
             del p

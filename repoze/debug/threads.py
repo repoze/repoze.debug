@@ -5,8 +5,8 @@ import traceback
 
 import webob
 
-from ._compat import thread
-from ._compat import TEXT
+from repoze.debug._compat import thread
+from repoze.debug._compat import TEXT
 
 _NOW = None
 def _now():

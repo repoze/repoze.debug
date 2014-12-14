@@ -2,13 +2,10 @@ import itertools
 import os
 import time
 import threading
-try:
-    from urllib import quote
-except: #pragma NO COVER Py3k
-    from urllib.parse import quote
 
 from repoze.debug.ui import is_gui_url
 from repoze.debug.ui import DebugGui
+from repoze.debug._compat import quote
 
 class ResponseLoggingMiddleware(object):
     def __init__(self, app, max_bodylen, keep, verbose_logger, trace_logger):

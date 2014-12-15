@@ -25,7 +25,8 @@ from repoze.debug._compat import gzip
 class ProfileException(Exception):
     pass
 
-class Request:
+class Request(object):
+
     def __init__(self):
         self.url = None
         self.start = None
@@ -41,7 +42,7 @@ class Request:
 
     def put(self, code, t, desc):
         if code not in ('A', 'B', 'I', 'E'):
-            raise "unknown request code %s" % code
+            raise ValueError("unknown request code %s" % code)
         if code == 'B':
             self.start = t
             self.method, self.url = desc.strip().split()
@@ -128,7 +129,7 @@ class Request:
         else:
             return "NA"
 
-    def __str__(self):
+    def __str__(self):    # pragma: no cover
         fmt = "%19s %5.2f %5.2f %5.2f %5.2f %1s %7s %4s %4s %s"
         body = (
             self.prettystart(), self.win(), self.wout(), self.wend(),
@@ -137,17 +138,18 @@ class Request:
             )
         return fmt % body
 
-    def getheader(self):
+    def getheader(self):  # pragma: no cover
         fmt = "%19s %5s %5s %5s %5s %1s %7s %4s %4s %s"
         body = ('Start', 'WIn', 'WOut', 'WEnd', 'Tot', 'S', 'OSize',
                 'Code', 'Act', 'URL')
         return fmt % body
 
 class StartupRequest(Request):
-    def endstage(self):
+
+    def endstage(self):  # pragma: no cover
         return "U"
 
-    def total(self):
+    def total(self):     # pragma: no cover
         return 0
 
 class Cumulative:
@@ -155,7 +157,6 @@ class Cumulative:
         self.url = url
         self.times = []
         self.hangs = 0
-        self.allelapsed = None
 
     def put(self, request):
         elapsed = request.elapsed
@@ -165,14 +166,9 @@ class Cumulative:
             self.times.append(elapsed)
 
     def all(self):
-        if self.allelapsed is None:
-            self.allelapsed = []
-            for elapsed in self.times:
-                self.allelapsed.append(elapsed)
-            self.allelapsed.sort()
-        return self.allelapsed
+        return sorted(self.times)
 
-    def __str__(self):
+    def __str__(self):    # pragma: no cover
         fmt = "%5s %5s %8.2f %5.2f %5.2f %5.2f %5.2f %s"
         body = (
             self.hangs, self.hits(), self.total(), self.max(), self.min(),
@@ -180,7 +176,7 @@ class Cumulative:
             )
         return fmt % body
 
-    def getheader(self):
+    def getheader(self):  # pragma: no cover
         fmt = '%5s %5s %8s %5s %5s %5s %5s %s'
         return fmt % ('Hangs', 'Hits', 'Total', 'Max', 'Min', 'Med',
                       'Mean', 'URL')
@@ -189,24 +185,19 @@ class Cumulative:
         return len(self.times)
 
     def max(self):
-        all = self.all()
-        if not all:
-            return 0
-        return max(all)
+        if self.times:
+            return max(self.times)
+        return 0
 
     def min(self):
-        all = self.all()
-        if not all:
-            return 0
-        return min(all)
+        if self.times:
+            return min(self.times)
+        return 0
 
     def mean(self):
-        l = len(self.times)
-        if l == 0:
-            return 0
-        else:
-            t = self.total()
-            return t/l
+        if self.times:
+            return float(self.total()) / self.hits()
+        return 0
 
     def median(self):
         all = self.all()
@@ -217,29 +208,19 @@ class Cumulative:
             if l == 1:
                 return all[0]
             elif l % 2 != 0:
-                i = l/2 + 1
-                return all[i]
+                return all[l // 2]
             else:
-                i = l/2 - 1
-                i2 = i + 1
-                v1 = all[i]
-                v2 = all[i2]
-                return (v1 + v2) / 2
+                i = l // 2 - 1
+                return float(all[i] + all[i + 1]) / 2
 
     def total(self):
-        t = 0
-        all = self.all()
-        for elapsed in all:
-            if elapsed is None:
-                continue
-            t = t + elapsed
-        return float(t)
+        return float(sum(self.times))
 
 def parselogline(line):
     tup = line.split(None, 4)
     if len(tup) == 4:
         code, pid, id, timestr = tup
-        return code, pid, id, timestr, ''
+        return [code, pid, id, timestr, '']
     elif len(tup) == 5:
         return tup
     else:

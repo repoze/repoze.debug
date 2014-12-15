@@ -191,7 +191,7 @@ class ResponseLoggingMiddlewareTests(unittest.TestCase):
         self.assertEqual(entry['response']['content-length'], 1)
         self.assertEqual(len(entry['request']['cgi_variables']), 2)
         self.assertEqual(len(entry['request']['wsgi_variables']), 2)
-        self.assertTrue(isinstance(entry['id'], int))
+        self.assertEqual(entry['id'], id(environ))
 
     def test_trace_logging(self):
         import time

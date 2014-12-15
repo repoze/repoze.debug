@@ -239,7 +239,6 @@ def get_earliest_file_data(files):
         line = line.strip()
         tup = parselogline(line)
         if tup is None:
-            print("Could not interpret line: %s" % line)
             continue
         code, pid, id, timestr, desc = tup
         timestr = timestr.strip()

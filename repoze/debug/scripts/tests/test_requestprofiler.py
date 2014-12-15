@@ -287,6 +287,7 @@ class CumulativeTests(unittest.TestCase):
         cumulative.times = [1, 21, 14, 21, 7]
         self.assertEqual(cumulative.median(), 14)
 
+
 class Test_parselogline(unittest.TestCase):
 
     def _callFUT(self, line):
@@ -318,3 +319,55 @@ class Test_parselogline(unittest.TestCase):
     def test_w_seven(self):
         self.assertEqual(self._callFUT('a b c d e f g'),
                          ['a', 'b', 'c', 'd', 'e f g'])
+
+
+class Test_get_earliest_file_data(unittest.TestCase):
+
+    def _callFUT(self, files):
+        from ..requestprofiler import get_earliest_file_data
+        return get_earliest_file_data(files)
+
+    def test_w_empty_list(self):
+        self.assertEqual(self._callFUT([]), None)
+
+    def test_w_single_but_empty_file(self):
+        from io import StringIO
+        self.assertEqual(self._callFUT([StringIO()]), None)
+
+    def test_w_single_but_bogus_file(self):
+        from io import StringIO
+        from ..._compat import TEXT
+        BOGUS = TEXT('BOGUS 1\nBOGUS 2')
+        self.assertEqual(self._callFUT([StringIO(BOGUS)]), None)
+
+    def test_w_single_valid_file(self):
+        from io import StringIO
+        from ..._compat import TEXT
+        VALID = TEXT('CODE PID ID 123.45 DESC')
+        buf = StringIO(VALID)
+        code, pid, id_, fromepoch, desc = self._callFUT([buf])
+        self.assertEqual(code, TEXT('CODE'))
+        self.assertEqual(pid, TEXT('PID'))
+        self.assertEqual(id_, TEXT('ID'))
+        self.assertEqual(fromepoch, 123.45)
+        self.assertEqual(desc, TEXT('DESC'))
+        self.assertEqual(buf.tell(), len(VALID))
+
+    def test_w_multiple_files(self):
+        from io import StringIO
+        from ..._compat import TEXT
+        VALID1 = TEXT('CODE1 PID1 ID1 234.56 DESC1\n'
+                      'CODE3 PID3 ID3 345.67 DESC3\n'
+                     )
+        buf1 = StringIO(VALID1)
+        VALID2 = TEXT('CODE2 PID2 ID2 123.45 DESC2')
+        buf2 = StringIO(VALID2)
+        code, pid, id_, fromepoch, desc = self._callFUT([buf1, buf2])
+        self.assertEqual(code, TEXT('CODE2'))
+        self.assertEqual(pid, TEXT('PID2'))
+        self.assertEqual(id_, TEXT('ID2'))
+        self.assertEqual(fromepoch, 123.45)
+        self.assertEqual(desc, TEXT('DESC2'))
+        # selected line is consumed, others are pushed back
+        self.assertEqual(buf1.tell(), 0)
+        self.assertEqual(buf2.tell(), len(VALID2))

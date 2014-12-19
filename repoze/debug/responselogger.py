@@ -1,3 +1,4 @@
+import io
 import itertools
 import os
 import time
@@ -93,8 +94,12 @@ class ResponseLoggingMiddleware(object):
         info['wsgi_variables'] = []
         info['body'] = ''
         if 'wsgi.input' in environ:
-            info['body'] = environ['wsgi.input'].read()
-            environ['wsgi.input'].seek(0)
+            readargs = [int(environ['CONTENT_LENGTH'])] if 'CONTENT_LENGTH' in environ else []
+            info['body'] = environ['wsgi.input'].read(*readargs)
+            try:
+                environ['wsgi.input'].seek(0)
+            except AttributeError:
+                environ['wsgi.input'] = io.BytesIO(info['body'])
         for k, v in sorted(request_data[('extra', 'CGI Variables')].items()):
             info['cgi_variables'].append((k, v))
         for k, v in sorted(request_data[('extra', 'WSGI Variables')].items()):

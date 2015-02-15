@@ -4,6 +4,8 @@ repoze.debug Changes
 Unreleased
 ----------
 
+- Add support for testing under Travis.
+
 - Add support for Python 3.4, PyPy3.
 
 - PR #5:  Avoid breaking when ``wsgi.input`` has no ``seek()`` method.

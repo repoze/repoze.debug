@@ -142,6 +142,40 @@ class ResponseLoggingMiddlewareTests(unittest.TestCase):
         app_iter = list(mw(environ, start_response))
         self.assertEqual(iterable.closed, True)
 
+    def test_call_input_non_rewindable(self):
+        BODY = b"Don't bother rewinding me!"
+        class _NoRewind(object):
+            def read(self, *args):
+                return BODY
+        body = [b'thebody']
+        app = DummyApp(body, '200 OK', [('Content-Length', str(len(body[0])))])
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 1, 10, vlogger, tlogger)
+        environ = _makeEnviron()
+        environ['wsgi.input'] = _NoRewind()
+        environ['CONTENT_LENGTH'] = str(len(body))
+        start_response = FakeStartResponse()
+        app_iter = mw(environ, start_response)
+        self.assertEqual(b''.join(app_iter), b'thebody')
+        self.assertEqual(len(vlogger.logged), 2)
+        self.assertFalse('WARNING-1' in vlogger.logged[1])
+
+    def test_call_contentlengthmissing(self):
+        import io
+        body = [b'thebody']
+        app = DummyApp(body, '200 OK', [])
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 1, 10, vlogger, tlogger)
+        environ = _makeEnviron()
+        environ['wsgi.input'] = io.BytesIO()
+        start_response = FakeStartResponse()
+        app_iter = mw(environ, start_response)
+        self.assertEqual(b''.join(app_iter), b'thebody')
+        self.assertEqual(len(vlogger.logged), 2)
+        self.assertFalse('WARNING-1' in vlogger.logged[1])
+
     def test_call_contentlengthwrong(self):
         body = [b'thebody']
         app = DummyApp(body, '200 OK', [('Content-Length', '1')])

@@ -22,8 +22,14 @@ requires = ['WebOb']
 
 
 here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.rst')).read()
-CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
+
+try:
+    with open(os.path.join(here, 'README.rst')) as f:
+        README = f.read()
+    with open(os.path.join(here, 'CHANGES.rst')) as f:
+        CHANGES = f.read()
+except IOError:
+    README = CHANGES = ''
 
 testing_extras = ['nose', 'coverage']
 

@@ -1,6 +1,17 @@
 repoze.debug README
 ===================
 
+.. image:: https://pypip.in/version/repoze.debug/badge.svg?style=flat
+    :target: https://pypi.python.org/pypi/repoze.debug/
+    :alt: Latest Version
+
+.. image:: https://travis-ci.org/repoze/repoze.debug.png?branch=master
+        :target: https://travis-ci.org/repoze/repoze.debug
+
+.. image:: https://readthedocs.org/projects/repozedebug/badge/?version=latest
+        :target: http://repozedebug.readthedocs.org/en/latest/ 
+        :alt: Documentation Status
+
 Middleware which can help with in-production forensic debugging.
 
 Installation

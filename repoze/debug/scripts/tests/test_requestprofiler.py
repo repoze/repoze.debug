@@ -371,3 +371,27 @@ class Test_get_earliest_file_data(unittest.TestCase):
         # selected line is consumed, others are pushed back
         self.assertEqual(buf1.tell(), 0)
         self.assertEqual(buf2.tell(), len(VALID2))
+
+
+class Test_get_requests(unittest.TestCase):
+
+    def _callFUT(self, files, *args, **kw):
+        from ..requestprofiler import get_requests
+        return get_requests(files, *args, **kw)
+
+    def test_wo_readstats_w_empty_files_list(self):
+        self.assertEqual(self._callFUT([]), [])
+
+    def test_wo_readstats_w_valid_file_start_after(self):
+        from io import StringIO
+        from ..._compat import TEXT
+        VALID = TEXT('CODE PID ID 123.45 DESC')
+        buf = StringIO(VALID)
+        self.assertEqual(self._callFUT([buf], start=234.56), [])
+
+    def test_wo_readstats_w_valid_file_end_before(self):
+        from io import StringIO
+        from ..._compat import TEXT
+        VALID = TEXT('CODE PID ID 234.56 DESC')
+        buf = StringIO(VALID)
+        self.assertEqual(self._callFUT([buf], end=123.45), [])

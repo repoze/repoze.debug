@@ -12,7 +12,7 @@
         :target: http://repozedebug.readthedocs.org/en/latest/ 
         :alt: Documentation Status
 
-Middleware which for in-production forensic debugging.
+Middleware for in-production forensic debugging.
 
 Installation
 ------------

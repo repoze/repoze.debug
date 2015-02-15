@@ -1,5 +1,5 @@
-repoze.debug README
-===================
+``repoze.debug`` README
+=======================
 
 .. image:: https://pypip.in/version/repoze.debug/badge.svg?style=flat
     :target: https://pypi.python.org/pypi/repoze.debug/
@@ -12,7 +12,7 @@ repoze.debug README
         :target: http://repozedebug.readthedocs.org/en/latest/ 
         :alt: Documentation Status
 
-Middleware which can help with in-production forensic debugging.
+Middleware which for in-production forensic debugging.
 
 Installation
 ------------

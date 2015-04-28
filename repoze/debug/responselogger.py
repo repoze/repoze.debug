@@ -114,7 +114,7 @@ class ResponseLoggingMiddleware(object):
         begin = info['begin']
         t = time.ctime(begin)
         out.append('--- begin REQUEST for %s at %s ---' % (request_id, t))
-        method_and_url = '%s %s' % (info['method'], info['url'])
+        method_and_url = '%s %s' % (info['method'], info['url'].decode('latin1'))
         out.append('URL: %s' % method_and_url)
         out.append('CGI Variables')
         for k, v in info['cgi_variables']:
@@ -168,7 +168,8 @@ class ResponseLoggingMiddleware(object):
                                          status, cl)
             self.trace_logger.info(info)
         out.append('--- begin RESPONSE for %s at %s ---' % (request_id, t))
-        out.append('URL: %s %s' % (request_info['method'], request_info['url']))
+        out.append('URL: %s %s' % (request_info['method'],
+                   request_info['url'].decode('latin1')))
         out.append('Status: %s' % response_info['status'])
         out.append('Response Headers')
         for k, v in response_info['headers']:

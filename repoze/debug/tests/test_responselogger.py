@@ -52,6 +52,7 @@ class ResponseLoggingMiddlewareTests(unittest.TestCase):
         # proper url encoding obviously is invalid,
         # but we should be graceful though.
         environ['PATH_INFO'] = '/äöü'
+        environ['QUERY_STRING'] = 'some_value=äöü'
         environ['REQUEST_METHOD'] = 'GET'
         start_response = FakeStartResponse()
         app_iter = mw(environ, start_response)
@@ -246,7 +247,7 @@ class ResponseLoggingMiddlewareTests(unittest.TestCase):
         rid = entry['id']
         begin = entry['request']['begin']
         self.assertEqual(begin, now)
-        
+
         result = logged[0].split(' ', 4)
         self.assertEqual(result[0], 'U')
         self.assertEqual(result[1], str(mw.pid))
@@ -259,7 +260,7 @@ class ResponseLoggingMiddlewareTests(unittest.TestCase):
         self.assertEqual(result[2], str(rid))
         self.assertEqual(result[3], str(begin))
         self.assertEqual(result[4], 'GET http://localhost')
-                         
+
         result = logged[2].split(' ', 4)
         self.assertEqual(result[0], 'A')
         self.assertEqual(result[1], str(mw.pid))
@@ -634,7 +635,7 @@ class FakeLogger(object):
 
     def __init__(self):
         self.logged = []
-        
+
     def info(self, msg):
         self.logged.append(msg)
 
@@ -645,13 +646,13 @@ class DummyApp(object):
         self.body = body
         self.status = status
         self.headers = headers
-        
+
     def __call__(self, environ, start_response):
         start_response(self.status, self.headers)
         self.called = True
         return self.body
 
-    
+
 class DummyBrokenApp(DummyApp):
 
     def __call__(self,environ, start_response):

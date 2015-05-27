@@ -95,7 +95,7 @@ class ResponseLoggingMiddleware(object):
         info['body'] = ''
         readargs = []
         if 'wsgi.input' in environ:
-            if 'CONTENT_LENGTH' in environ:
+            if 'CONTENT_LENGTH' in environ and environ['CONTENT_LENGTH']:
                 readargs.append(int(environ['CONTENT_LENGTH']))
             info['body'] = environ['wsgi.input'].read(*readargs)
             try:

@@ -12,7 +12,6 @@
 #
 ##############################################################################
 
-__version__ = '1.0.2'
 
 import os
 
@@ -36,7 +35,7 @@ testing_extras = ['nose', 'coverage']
 docs_extras = ['Sphinx']
 
 setup(name='repoze.debug',
-      version=__version__,
+      version='1.1.dev0',
       description='Forensic debugging WSGI middleware',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
@@ -44,10 +43,8 @@ setup(name='repoze.debug',
         "Intended Audience :: Developers",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: Implementation :: CPython",

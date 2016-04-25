@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Unreleased
-----------
+1.1 (unreleased)
+----------------
 
 - PR #7:  Suppress ``UnicodeDecodeError`` when query strings contain non
   ASCII characters..

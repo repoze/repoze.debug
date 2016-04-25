@@ -4,10 +4,10 @@ Changelog
 1.1 (unreleased)
 ----------------
 
-- PR #5:  Avoid breaking when ``wsgi.input`` has no ``seek()`` method.
-
 - PR #7:  Suppress ``UnicodeDecodeError`` when query strings contain non
   ASCII characters..
+
+- PR #5:  Avoid breaking when ``wsgi.input`` has no ``seek()`` method.
 
 - Add support for testing under Travis.
 

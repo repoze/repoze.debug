@@ -1,17 +1,19 @@
 Changelog
 =========
 
-Unreleased
-----------
+1.1 (unreleased)
+----------------
+
+- PR #5:  Avoid breaking when ``wsgi.input`` has no ``seek()`` method.
 
 - PR #7:  Suppress ``UnicodeDecodeError`` when query strings contain non
   ASCII characters..
 
 - Add support for testing under Travis.
 
-- Add support for Python 3.4, PyPy3.
+- Drop support for Python 2.6, 3.2.
 
-- PR #5:  Avoid breaking when ``wsgi.input`` has no ``seek()`` method.
+- Add support for Python 3.4, PyPy3.
 
 1.0.2 (2013-07-02)
 ------------------

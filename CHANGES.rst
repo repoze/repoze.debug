@@ -13,7 +13,7 @@ Changelog
 
 - Drop support for Python 2.6, 3.2.
 
-- Add support for Python 3.4, PyPy3.
+- Add support for Python 3.4, 3,5, and PyPy3.
 
 1.0.2 (2013-07-02)
 ------------------

@@ -4,6 +4,9 @@ Changelog
 Unreleased
 ----------
 
+- PR #7:  Suppress ``UnicodeDecodeError`` when query strings contain non
+  ASCII characters..
+
 - Add support for testing under Travis.
 
 - Add support for Python 3.4, PyPy3.

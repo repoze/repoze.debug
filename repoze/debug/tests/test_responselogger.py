@@ -177,6 +177,23 @@ class ResponseLoggingMiddlewareTests(unittest.TestCase):
         self.assertEqual(len(vlogger.logged), 2)
         self.assertFalse('WARNING-1' in vlogger.logged[1])
 
+    def test_call_contentlengthemptyvalue(self):
+        body = [b'thebody']
+        app = DummyApp(body, '200 OK', [('Content-Length', '')])
+        vlogger = FakeLogger()
+        tlogger = FakeLogger()
+        mw = self._makeOne(app, 1, 10, vlogger, tlogger)
+        environ = _makeEnviron()
+        environ['CONTENT_LENGTH'] = ''
+        start_response = FakeStartResponse()
+        app_iter = mw(environ, start_response)
+        entry = mw.entries[0]
+        self.assertEqual(b''.join(app_iter), b'thebody')
+        self.assertEqual(len(vlogger.logged), 2)
+        self.assertEqual(entry['response']['content-length'], None)
+        self.assertEqual(entry['response']['headers'],
+                         [('Content-Length', '')])
+
     def test_call_contentlengthwrong(self):
         body = [b'thebody']
         app = DummyApp(body, '200 OK', [('Content-Length', '1')])

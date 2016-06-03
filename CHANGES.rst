@@ -4,6 +4,8 @@ Changelog
 1.1 (unreleased)
 ----------------
 
+- PR #8:  Tolerate empty value for ``Content-Length`` header.
+
 - PR #7:  Suppress ``UnicodeDecodeError`` when query strings contain non
   ASCII characters..
 

@@ -1,5 +1,5 @@
-``repoze.debug`` README
-=======================
+repoze.debug
+============
 
 .. image:: https://travis-ci.org/repoze/repoze.debug.png?branch=master
         :target: https://travis-ci.org/repoze/repoze.debug
@@ -23,6 +23,10 @@ Install using setuptools, e.g. (within a virtualenv)::
 
  $ easy_install repoze.debug
 
+or using pip::
+
+ $ pip install repoze.debug
+
 
 Usage
 -----
@@ -31,7 +35,7 @@ For details on using the various components, please see the
 documentation in ``docs/index.rst``.  A rendered version of that documentation
 is also available online:
 
- - http://docs.repoze.org/debug
+ - http://repozeprofile.readthedocs.org/en/latest/
 
 
 Reporting Bugs 

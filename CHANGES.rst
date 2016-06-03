@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.1 (unreleased)
+1.1 (2016-06-03)
 ----------------
 
 - PR #8:  Tolerate empty value for ``Content-Length`` header.

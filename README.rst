@@ -35,7 +35,7 @@ For details on using the various components, please see the
 documentation in ``docs/index.rst``.  A rendered version of that documentation
 is also available online:
 
- - http://repozeprofile.readthedocs.org/en/latest/
+ - http://repozedebug.readthedocs.org/en/latest/
 
 
 Reporting Bugs 
